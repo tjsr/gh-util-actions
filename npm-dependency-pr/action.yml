@@ -86,7 +86,7 @@ runs:
     if: inputs.skipCi != 'true'
     shell: bash
     run: |
-      if [ -z "${{ inputs.projectPath }}" ]; then
+      if [ ! -z "${{ inputs.projectPath }}" ]; then
         cd ${{ inputs.projectPath }}
       fi
       npm ci
