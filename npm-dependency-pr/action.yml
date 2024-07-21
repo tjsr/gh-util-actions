@@ -42,8 +42,9 @@ outputs:
     value: ${{ steps.action-npm-outdated.outputs.branchName }}
 
 runs:
-  run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
+  # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
+  shell: bash
   steps:
   # - run: . $GITHUB_ACTION_PATH/outdated.sh
   #   env:
@@ -59,6 +60,7 @@ runs:
   # Setup .npmrc file to publish to GitHub Packages
   - uses: actions/setup-node@v4
     if: inputs.nodeVersion
+    shell: bash
     with:
       node-version: 20.15.1
       cache: 'npm'
@@ -68,6 +70,7 @@ runs:
 
   - name: Install npm ${{ inputs.npmVersion}}
     run: npm install -g npm@${{ inputs.npmVersion}}
+    shell: bash
 
   - name: Cache node modules
     id: cache-node_modules
@@ -83,6 +86,7 @@ runs:
   - name: Install ${{ env.PROJECT }} dependencies
     id: install
     if: inputs.skipCi != 'true'
+    shell: bash
     run: npm ci
 
   - name: Get latest version for ${{ inputs.package }} on ${{ env.PROJECT }}
