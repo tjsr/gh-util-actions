@@ -2,6 +2,10 @@ name: '@tjsr/gh-util-actions'
 description: Update an npm dependency and raise a PR
 author: Tim Rowe <tim@tjsr.id.au>
 inputs:
+  token:
+    type: string
+    description: 'The GitHub token to use for PR creation'
+    required: true
   dependency:
     type: string
     description: 'Dependency to update'
@@ -146,7 +150,7 @@ runs:
     shell: bash
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.get-branch.outputs.branch != ''
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ input.token }}
     run: |
       prs=$(gh pr list \
           --repo "$GITHUB_REPOSITORY" \

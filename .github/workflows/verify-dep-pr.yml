@@ -16,6 +16,7 @@ jobs:
         projectPath: './npm-dependency-pr/tests'
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
+        token: ${{ secrets.GITHUB_TOKEN }}
 
 
 #   verify-specified:
