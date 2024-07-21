@@ -44,7 +44,6 @@ outputs:
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
-  shell: bash
   steps:
   # - run: . $GITHUB_ACTION_PATH/outdated.sh
   #   env:
@@ -60,7 +59,6 @@ runs:
   # Setup .npmrc file to publish to GitHub Packages
   - uses: actions/setup-node@v4
     if: inputs.nodeVersion
-    shell: bash
     with:
       node-version: 20.15.1
       cache: 'npm'
