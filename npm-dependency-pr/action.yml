@@ -184,6 +184,12 @@ runs:
       echo Installing updated npm depenency ${{ inputs.dependency }}@${{ steps.get-version.outputs.version }}
       npm install --save ${{ inputs.dependency }}@${{ steps.get-version.outputs.version }}
 
+  - name: Verify update was necessary
+    if: !(steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false')
+    id: update-status
+    shell: bash
+    run: echo "::set-output name=status::cancelled"
+
   - name: Extract base branch name
     id: base-branch
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
