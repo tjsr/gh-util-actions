@@ -6,7 +6,7 @@ jobs:
     name: Verify the action with no version number
     runs-on: ubuntu-latest
     steps:
-    - uses: ./
+    - uses: ./npm-dependency-pr
       with:
         dependency: 'action-npm-outdated'
         project: 'action-npm-outdated'
