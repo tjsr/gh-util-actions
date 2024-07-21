@@ -14,6 +14,7 @@ jobs:
         dependency: 'action-npm-outdated'
         project: 'action-npm-outdated'
         projectPath: './npm-dependency-pr/tests'
+        nodeVersion: '20.15.1'
         failOnNoNewVersion: true
 
 
