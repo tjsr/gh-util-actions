@@ -1,0 +1,54 @@
+name: Verify the composite check-upgrade-pr action works
+description: |
+  Does a project checkout, checks for either a given very or
+  searches for the latest, checks if a PR already exists, and creates one if it doesn't.
+on: push
+author: Tim Rowe <tim@tjsr.id.au>
+
+jobs:
+  verify-outdated:
+    name: Verify the action with no version number
+    runs-on: ubuntu-latest
+    steps:
+    - uses: ./
+      with:
+        dependency: 'action-npm-outdated'
+        project: 'action-npm-outdated'
+        projectPath: './npm-dependency-pr/tests'
+        failOnNoNewVersion: true
+    - name: Check out repository code
+      uses: actions/checkout@v4
+
+
+#   verify-specified:
+#     name: Verify the action when we give a version number
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Check out repository code
+#       uses: actions/checkout@v4
+
+#   verify-branch-exists:
+#     name: Verify the action when we give a version number
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Check out repository code
+#       uses: actions/checkout@v4
+    
+    
+#   - name: Verify the action works
+#       uses: tjsr/gh-util-actions@v1
+#       with:
+#         dependency: 'action-npm-outdated'
+#         project: 'action-npm-outdated'
+#         projectPath: '.'
+#         failOnNoNewVersion: true  
+# runs:
+#   using: 'composite'
+#   steps:
+#   - run-name: Checkout the repo
+#     run: echo "Checking out the repo"
+#     id: checkout
+#     shell: bash
+
+#   - name: Check out repository code
+#     uses: actions/checkout@v4

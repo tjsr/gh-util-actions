@@ -1,0 +1,125 @@
+name: '@tjsr/gh-util-actions'
+description: Update an npm dependency and raise a PR
+author: Tim Rowe <tim@tjsr.id.au>
+inputs:
+  dependency:
+    type: string
+    description: 'Dependency to update'
+    required: true
+  project:
+    type: string
+    description: 'The target project name that must be the owner of the package. This is usually the directory name the package.json file resides under, not the name field in package.json'
+    required: false
+  projectPath:
+    type: string
+    description: 'The path to the project to run npm-related scripts within'
+    required: false
+  nodeVersion:
+    type: string
+    description: 'The npm version to install with setup-node. If not provided, will not be installed. Scope will default to the current user, and repository to npm.pkg.github.com.  If you wish to customise these values, setup node manually.'
+    required: false
+  skipCheckout:
+    type: boolean
+    description: 'Whether to skip the checkout of the repository code'
+    required: false
+    default: false
+  npmVersion:
+    type: string
+    description: 'Default: 10.8.2. The npm version to install with npm install -g. >=10.8.2 required'
+    required: false
+    default: '10.8.2'
+  skipCi:
+    type: boolean
+    description: 'Whether to skip the npm ci command execution being called implicitly'
+    required: false
+    default: fales
+  packageVersion:
+    type: string
+    description: 'The version of the package to install. If not provided, will search for the latest version'
+    required: false
+
+outputs:
+  hasNewVersion:
+    description: 'Whether or not there is a new version'
+    value: ${{ steps.action-npm-outdated.outputs.hasNewVersion }}
+  branchName:
+    description: 'The name of the branch created'
+    value: ${{ steps.action-npm-outdated.outputs.branchName }}
+
+runs:
+  run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
+  using: 'composite'
+  steps:
+  # - run: . $GITHUB_ACTION_PATH/outdated.sh
+  #   env:
+  #     INPUT_DEPENDENCY: ${{ inputs.dependency }}
+  #     INPUT_PROJECT: ${{ inputs.project }}
+  #     INPUT_FAIL_ON_NO_NEW_VERSION: ${{ inputs.failOnNoNewVersion }}
+  #     INPUT_SKIP_NPM_CI_EXECUTE: ${{ inputs.skipNpmCiExecute }}
+  #     INPUT_PROJECT_PATH: ${{ inputs.projectPath }}
+  #   shell: bash
+  #   id: action-npm-outdated
+  #   name: Run action-npm-outdated
+
+  - name: Check out repository code
+    if: inputs.skipCheckout != 'true'
+    uses: actions/checkout@v4
+
+  # Setup .npmrc file to publish to GitHub Packages
+  - uses: actions/setup-node@v4
+    if: inputs.nodeVersion
+    with:
+      node-version: 20.15.1
+      cache: 'npm'
+      registry-url: 'https://npm.pkg.github.com'
+      # Defaults to the user or organization that owns the workflow file
+      scope: "@${{ github.actor }}"
+
+  - name: Install npm ${{ inputs.npmVersion}}
+    run: npm install -g npm@${{ inputs.npmVersion}}
+
+  - name: Cache node modules
+    id: cache-node_modules
+    uses: actions/cache@main
+    env:
+      cache-name: cache-node-modules
+    with:
+      # npm cache files are stored in `~/.npm` on Linux/macOS
+      path: ~/node_modules
+      # todo - change this so we are less restrictive on package-lock changes
+      key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
+  - name: Install ${{ env.PROJECT }} dependencies
+    id: install
+    if: inputs.skipCi != 'true'
+    run: npm ci
+
+  - name: Get latest version for ${{ inputs.package }} on ${{ env.PROJECT }}
+    id: get-latest-version
+    if: ${{ inputs.packageVersion == '' }}
+    uses: tjsr/action-npm-outdated@main
+    with:
+      project: ${{ inputs.project }}
+      dependency: ${{ inputs.dependency }}
+      projectPath: ${{ inputs.projectPath }}
+
+  - name: Get version number to use
+    id: get-version
+    env:
+      LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
+      SPECIFIED_VERSION: ${{ inputs.packageVersion }}
+    run: |
+      if [ -z "$SPECIFIED_VERSION" ]; then
+        if [ -z "$LATEST_VERSION" ]; then
+          echo "No new version found for ${{ env.PACKAGE }}."
+        else
+          echo "Using version $LATEST_VERSION for ${{ env.PACKAGE }} retrieved from outdated."
+          echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
+          echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
+        fi
+      else
+        echo "Using version $SPECIFIED_VERSION for ${{ env.PACKAGE }} provided in parameter."
+        echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
+        echo "version=$SPECIFIED_VERSION" >> "$GITHUB_OUTPUT"
+      fi
+
