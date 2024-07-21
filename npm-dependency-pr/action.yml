@@ -41,6 +41,10 @@ inputs:
     description: 'Whether the build should fail with an exit code if no new version is available for the specified package'
     required: false
     default: false
+  reviewers:
+    type: string
+    description: 'Comma-separated list of reviewers to add to the PR'
+    required: false
 
 outputs:
   hasNewVersion:
@@ -49,22 +53,20 @@ outputs:
   branchName:
     description: 'The name of the branch created'
     value: ${{ steps.action-npm-outdated.outputs.branchName }}
+  pullRequestNumber:
+    description: 'The number of the pull request created'
+    value: ${{ steps.action-npm-outdated.outputs.pull-request-number }}
+  pullRequestUrl:
+    description: 'The URL of the pull request created'
+    value: ${{ steps.action-npm-outdated.outputs.pull-request-url }}
+  pullRequestOperation:
+    description: 'The operation performed on the pull request'
+    value: ${{ steps.action-npm-outdated.outputs.pull-request-operation }}
 
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
   steps:
-  # - run: . $GITHUB_ACTION_PATH/outdated.sh
-  #   env:
-  #     INPUT_DEPENDENCY: ${{ inputs.dependency }}
-  #     INPUT_PROJECT: ${{ inputs.project }}
-  #     INPUT_FAIL_ON_NO_NEW_VERSION: ${{ inputs.failOnNoNewVersion }}
-  #     INPUT_SKIP_NPM_CI_EXECUTE: ${{ inputs.skipNpmCiExecute }}
-  #     INPUT_PROJECT_PATH: ${{ inputs.projectPath }}
-  #   shell: bash
-  #   id: action-npm-outdated
-  #   name: Run action-npm-outdated
-
   # Setup .npmrc file to publish to GitHub Packages
   - uses: actions/setup-node@v4
     if: inputs.nodeVersion
@@ -73,7 +75,7 @@ runs:
       # cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
       # Defaults to the user or organization that owns the workflow file
-      scope: "@${{ github.actor }}"
+      scope: "@${{ github.organization }}"
 
   - name: Install npm ${{ inputs.npmVersion}}
     run: npm install -g npm@${{ inputs.npmVersion}}
@@ -182,3 +184,14 @@ runs:
       BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
       echo "PR will be based off branch $BASE_BRANCH"
       echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
+
+  - name: Create a Pull Request for the changes
+    id: create-pr
+    if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
+    uses: peter-evans/create-pull-request@v6
+    with:
+      commit-message: Update ${{ env.PACKAGE }} to ${{ steps.get-version.outputs.version }}
+      title: Update ${{ env.PACKAGE }} to ${{ steps.get-version.outputs.version }}
+      base: ${{ steps.base-branch.outputs.branch }}
+      branch: ${{ steps.get-branch.outputs.branch }}
+      reviewers: ${{ inputs.reviewers || '' }}
