@@ -11,13 +11,11 @@ jobs:
   
     - uses: ./npm-dependency-pr
       with:
-        dependency: 'action-npm-outdated'
-        project: 'action-npm-outdated'
+        dependency: 'rimraf'
         projectPath: './npm-dependency-pr/tests'
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
-
 
 #   verify-specified:
 #     name: Verify the action when we give a version number
