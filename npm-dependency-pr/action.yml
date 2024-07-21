@@ -122,7 +122,7 @@ runs:
     run: |
       if [ -z "$SPECIFIED_VERSION" ]; then
         if [ -z "$LATEST_VERSION" ]; then
-          echo "No new version found for ${{ inputs.dependency }}."
+          echo "No new version found for ${{ inputs.dependency }} when getting version number."
         else
           echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
           if [ "${{ inputs.useLatest }}" == 'true' ]; then
@@ -149,7 +149,7 @@ runs:
     run: |
       echo "Value of get-version outputs is ${{ steps.get-version.outputs.version }}"
       if [ -z "$VERSION" ]; then
-        echo "No new version found for ${{ inputs.dependency }}."
+        echo "No new version found for ${{ inputs.dependency }} when getting target branch name."
       else
         echo "branch=dependency/${{ inputs.dependency }}/$VERSION" >> "$GITHUB_OUTPUT"
       fi
@@ -186,6 +186,7 @@ runs:
 
   - name: Extract base branch name
     id: base-branch
+    if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
     shell: bash
     run: |
       BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
