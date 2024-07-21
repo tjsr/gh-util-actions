@@ -117,14 +117,21 @@ runs:
     id: get-version
     env:
       LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
+      WANTED_VERSION: ${{ steps.get-latest-version.outputs.latest }}
       SPECIFIED_VERSION: ${{ inputs.packageVersion }}
     run: |
       if [ -z "$SPECIFIED_VERSION" ]; then
         if [ -z "$LATEST_VERSION" ]; then
           echo "No new version found for ${{ inputs.dependency }}."
         else
-          echo "Using version $LATEST_VERSION for ${{ inputs.dependency }} retrieved from outdated."
           echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.useLatest }}" == 'true' ]; then
+            echo "Using latest version $LATEST_VERSION for ${{ inputs.dependency }} retrieved from outdated."
+            echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "Using wanted version $WANTED_VERSION for ${{ inputs.dependency }} retrieved from outdated."
+            echo "version=$WANTED_VERSION" >> "$GITHUB_OUTPUT"
+          fi
           echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
         fi
       else
