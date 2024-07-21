@@ -97,6 +97,7 @@ runs:
       projectPath: ${{ inputs.projectPath }}
 
   - name: Get version number to use
+    shell: bash
     id: get-version
     env:
       LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
