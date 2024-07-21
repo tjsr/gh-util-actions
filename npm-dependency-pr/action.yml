@@ -61,7 +61,7 @@ runs:
     if: inputs.nodeVersion
     with:
       node-version: 20.15.1
-      cache: 'npm'
+      # cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
       # Defaults to the user or organization that owns the workflow file
       scope: "@${{ github.actor }}"
