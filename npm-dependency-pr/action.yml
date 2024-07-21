@@ -85,7 +85,11 @@ runs:
     id: install
     if: inputs.skipCi != 'true'
     shell: bash
-    run: npm ci
+    run: 
+      if [ -z "${{ inputs.projectPath }}" ]; then
+        cd ${{ inputs.projectPath }}
+      fi
+      npm ci
 
   - name: Get latest version for ${{ inputs.package }} on ${{ env.PROJECT }}
     id: get-latest-version
