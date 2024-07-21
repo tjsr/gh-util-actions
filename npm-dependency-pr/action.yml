@@ -115,15 +115,63 @@ runs:
     run: |
       if [ -z "$SPECIFIED_VERSION" ]; then
         if [ -z "$LATEST_VERSION" ]; then
-          echo "No new version found for ${{ env.PACKAGE }}."
+          echo "No new version found for ${{ input.dependency }}."
         else
-          echo "Using version $LATEST_VERSION for ${{ env.PACKAGE }} retrieved from outdated."
+          echo "Using version $LATEST_VERSION for ${{ input.dependency }} retrieved from outdated."
           echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
           echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
         fi
       else
-        echo "Using version $SPECIFIED_VERSION for ${{ env.PACKAGE }} provided in parameter."
+        echo "Using version $SPECIFIED_VERSION for ${{ input.dependency }} provided in parameter."
         echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
         echo "version=$SPECIFIED_VERSION" >> "$GITHUB_OUTPUT"
       fi
 
+  - name: Get target branch name
+    id: get-branch
+    env:
+      VERSION: ${{ steps.get-version.outputs.version }}
+    if: steps.get-version.outputs.hasNewVersion == 'true' || inputs.package-version != ''
+    run: |
+      echo "Value of get-version outputs is ${{ steps.get-version.outputs.version }}"
+      if [ -z "$VERSION" ]; then
+        echo "No new version found for ${{ input.dependency }}."
+      else
+        echo "branch=dependency/${{ input.dependency }}/$VERSION" >> "$GITHUB_OUTPUT"
+      fi
+
+  - name: Check if PR exists
+    id: check-pr-exists
+    if: steps.get-version.outputs.hasNewVersion == 'true' && steps.get-branch.outputs.branch != ''
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    run: |
+      prs=$(gh pr list \
+          --repo "$GITHUB_REPOSITORY" \
+          --head '${{ steps.get-branch.outputs.branch }}' \
+          )
+      if ((prs > 0)); then
+          echo "Branch already exists at dependency/${{ input.dependency }}/$VERSION - no PR will be created."
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+      else
+          echo "PR will be created at dependency/${{ input.dependency }}/$VERSION"
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+      fi
+
+  - name: Update ${{ input.dependency }} via npm
+    if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
+    id: update-package
+    run: |
+      if [ ! -z "${{ inputs.projectPath }}" ]; then
+        cd ${{ inputs.projectPath }}
+      fi
+      echo Installing updated npm depenency ${{ input.dependency }}@${{ steps.get-version.outputs.version }}
+      npm install --save ${{ input.dependency }}@${{ steps.get-version.outputs.version }}
+
+  - name: Extract base branch name
+    id: base-branch
+    shell: bash
+    run: |
+      BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+      echo "PR will be based off branch $BASE_BRANCH"
+      echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
