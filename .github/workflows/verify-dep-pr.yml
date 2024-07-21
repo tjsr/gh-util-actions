@@ -3,6 +3,10 @@ on: push
 
 jobs:
   verify-outdated:
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
     name: Verify the action with no version number
     runs-on: ubuntu-latest
     steps:
