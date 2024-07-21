@@ -85,7 +85,7 @@ runs:
     id: install
     if: inputs.skipCi != 'true'
     shell: bash
-    run: 
+    run: |
       if [ -z "${{ inputs.projectPath }}" ]; then
         cd ${{ inputs.projectPath }}
       fi
