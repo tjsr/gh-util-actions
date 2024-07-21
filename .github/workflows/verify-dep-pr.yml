@@ -6,14 +6,15 @@ jobs:
     name: Verify the action with no version number
     runs-on: ubuntu-latest
     steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+  
     - uses: ./npm-dependency-pr
       with:
         dependency: 'action-npm-outdated'
         project: 'action-npm-outdated'
         projectPath: './npm-dependency-pr/tests'
         failOnNoNewVersion: true
-    - name: Check out repository code
-      uses: actions/checkout@v4
 
 
 #   verify-specified:
