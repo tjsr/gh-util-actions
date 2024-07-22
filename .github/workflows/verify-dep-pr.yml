@@ -29,6 +29,7 @@ jobs:
       packages: read
     env:
       REMOTE_PROJECT_PATH: "${{ github.workspace }}/action-npm-outdated"
+      REMOTE_REPO: 'tjsr/action-npm-outdated'
       TEST_PROJECT_PATH: "${{ github.workspace }}/action-npm-outdated/tests/npm-project"
     name: Verify the action against a different repository
     runs-on: ubuntu-latest
@@ -55,6 +56,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         projectPath: "${{ env.TEST_PROJECT_PATH }}"
         repoPath: "${{ env.REMOTE_PROJECT_PATH }}"
+        externalRepo: "${{ env.REMOTE_REPO }}"
 
 #   verify-specified:
 #     name: Verify the action when we give a version number

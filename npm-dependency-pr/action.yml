@@ -14,6 +14,10 @@ inputs:
     type: string
     description: 'The path to the repository to run git pr commands within which the target repo will be cloned to as a local working copy.'
     required: false
+  externalRepo:
+    type: string
+    description: 'The external repository to run the action against.  eg 'owner/repo'
+    required: false
   project:
     type: string
     description: 'The target project name that must be the owner of the package. This is usually the directory name the package.json file resides under, not the name field in package.json'
@@ -164,18 +168,10 @@ runs:
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.get-branch.outputs.branch != ''
     env:
       GITHUB_TOKEN: ${{ inputs.token }}
-    run: |
-      prs=$(gh pr list \
-          --repo "$GITHUB_REPOSITORY" \
-          --head '${{ steps.get-branch.outputs.branch }}' \
-          )
-      if ((prs > 0)); then
-          echo "Branch already exists at dependency/${{ inputs.dependency }}/$VERSION - no PR will be created."
-          echo "exists=true" >> "$GITHUB_OUTPUT"
-      else
-          echo "PR will be created at dependency/${{ inputs.dependency }}/$VERSION"
-          echo "exists=false" >> "$GITHUB_OUTPUT"
-      fi
+      BRANCH_NAME: "dependency/${{ inputs.dependency }}/${{ steps.get-version.outputs.version }}"
+      BRANCH_HEAD: ${{ steps.get-branch.outputs.branch }}
+      GITHUB_REPOSITORY: ${{ inputs.externalRepo || github.repository }}
+    run: ./scripts/check-pr-exists.sh
 
   - name: Update ${{ inputs.dependency }} via npm
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
