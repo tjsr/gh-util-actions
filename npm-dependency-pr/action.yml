@@ -10,6 +10,10 @@ inputs:
     type: string
     description: 'Dependency to update'
     required: true
+  repoPath:
+    type: string
+    description: 'The path to the repository to run git pr commands within which the target repo will be cloned to as a local working copy.'
+    required: false
   project:
     type: string
     description: 'The target project name that must be the owner of the package. This is usually the directory name the package.json file resides under, not the name field in package.json'
@@ -209,3 +213,4 @@ runs:
       base: ${{ steps.base-branch.outputs.branch }}
       branch: ${{ steps.get-branch.outputs.branch }}
       reviewers: ${{ inputs.reviewers || '' }}
+      path: ${{ inputs.repoPath }}
