@@ -13,13 +13,39 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v4
   
-    - uses: ./npm-dependency-pr
+    - name: Run the npm-dependency-pr util action
+      uses: ./npm-dependency-pr
       with:
         dependency: 'rimraf'
         projectPath: './npm-dependency-pr/tests'
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
+
+  verify-remote-repo:
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+    env:
+      TEST_PROJECT_PATH: "${{ github.workspace }}/tests/npm-project"
+    name: Verify the action against a different repository
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+      with:
+        repository: 'tjsr/npm-action-outdated'
+
+    - name: Run the npm-dependency-pr util action on an external repository
+      uses: ./npm-dependency-pr
+      with:
+        dependency: 'rimraf'
+        project: 'npm-project'
+        nodeVersion: '20.15.1'
+        failOnNoNewVersion: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        projectPath: "${{ env.TEST_PROJECT_PATH }}"
 
 #   verify-specified:
 #     name: Verify the action when we give a version number
