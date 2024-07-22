@@ -32,10 +32,11 @@ jobs:
     name: Verify the action against a different repository
     runs-on: ubuntu-latest
     steps:
-    - name: Check out repository code
+    - name: Check out repository code for an external project's repo
       uses: actions/checkout@v4
       with:
         repository: 'tjsr/npm-action-outdated'
+        ref: 'main'
 
     - name: Run the npm-dependency-pr util action on an external repository
       uses: ./npm-dependency-pr
