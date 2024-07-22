@@ -35,7 +35,7 @@ jobs:
     - name: Check out repository code for an external project's repo
       uses: actions/checkout@v4
       with:
-        repository: 'tjsr/npm-action-outdated'
+        repository: 'tjsr/action-npm-outdated'
         ref: 'main'
 
     - name: Run the npm-dependency-pr util action on an external repository
