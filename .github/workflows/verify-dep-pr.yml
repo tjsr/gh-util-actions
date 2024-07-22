@@ -28,18 +28,24 @@ jobs:
       pull-requests: write
       packages: read
     env:
-      TEST_PROJECT_PATH: "${{ github.workspace }}/tests/npm-project"
+      TEST_PROJECT_PATH: "${{ github.workspace }}/action-npm-outdated/tests/npm-project"
     name: Verify the action against a different repository
     runs-on: ubuntu-latest
     steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+      with:
+        path: 'gh-util-actions'
+
     - name: Check out repository code for an external project's repo
       uses: actions/checkout@v4
       with:
         repository: 'tjsr/action-npm-outdated'
         ref: 'main'
+        path: 'action-npm-outdated'
 
     - name: Run the npm-dependency-pr util action on an external repository
-      uses: ./npm-dependency-pr
+      uses: ./gh-util-actions/npm-dependency-pr
       with:
         dependency: 'rimraf'
         project: 'npm-project'
