@@ -160,7 +160,7 @@ runs:
 
   - name: Check if PR exists
     id: check-pr-exists
-    uses: ../pr-exists
+    uses: ./pr-exists
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.get-branch.outputs.branch != ''
     with:
       token: ${{ inputs.token }}
