@@ -74,7 +74,10 @@ outputs:
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
+  env:
+    SCRIPT_DIR: ${{ github.workspace }}/scripts
   steps:
+
   # Setup .npmrc file to publish to GitHub Packages
   - uses: actions/setup-node@v4
     if: inputs.nodeVersion
@@ -144,6 +147,9 @@ runs:
       else
         echo "branch=dependency/${{ inputs.dependency }}/$VERSION" >> "$GITHUB_OUTPUT"
       fi
+
+  - name: Output the current working directory for debugging.
+    run: echo "Current working directory is $PWD, script dir is $SCRIPT_DIR"
 
   - name: Check if PR exists
     id: check-pr-exists
