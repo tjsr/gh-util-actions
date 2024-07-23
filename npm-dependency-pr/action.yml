@@ -74,8 +74,6 @@ outputs:
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
-  env:
-    SCRIPT_DIR: ${{ github.workspace }}/scripts
   steps:
 
   # Setup .npmrc file to publish to GitHub Packages
@@ -123,6 +121,11 @@ runs:
       projectPath: ${{ inputs.projectPath }}
       failOnNoNewVersion: ${{ inputs.failOnNoNewVersion }}
 
+  - name: Output the current working directory for debugging.
+    env:
+      SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
+    run: echo "Current working directory is $PWD, script dir is $SCRIPT_DIR"
+
   - name: Get version number to use
     shell: bash
     id: get-version
@@ -132,7 +135,8 @@ runs:
       SPECIFIED_VERSION: ${{ inputs.packageVersion }}
       INPUT_USE_LATEST: ${{ inputs.useLatest }}
       INPUT_DEPENDENCY: ${{ inputs.dependency }}
-    run: ./scripts/version-select.sh
+      SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
+    run: $SCRIPT_DIR/version-select.sh
 
   - name: Get target branch name
     id: get-branch
@@ -148,9 +152,6 @@ runs:
         echo "branch=dependency/${{ inputs.dependency }}/$VERSION" >> "$GITHUB_OUTPUT"
       fi
 
-  - name: Output the current working directory for debugging.
-    run: echo "Current working directory is $PWD, script dir is $SCRIPT_DIR"
-
   - name: Check if PR exists
     id: check-pr-exists
     shell: bash
@@ -160,7 +161,8 @@ runs:
       BRANCH_NAME: "dependency/${{ inputs.dependency }}/${{ steps.get-version.outputs.version }}"
       BRANCH_HEAD: ${{ steps.get-branch.outputs.branch }}
       GITHUB_REPOSITORY: ${{ inputs.externalRepo || github.repository }}
-    run: ./scripts/check-pr-exists.sh
+      SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
+    run: $SCRIPT_DIR/check-pr-exists.sh
 
   - name: Update ${{ inputs.dependency }} via npm
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
