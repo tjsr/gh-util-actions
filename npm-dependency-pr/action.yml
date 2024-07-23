@@ -75,7 +75,6 @@ runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
   steps:
-
   - name: Set script path
     shell: bash
     run: |
@@ -155,13 +154,13 @@ runs:
         echo "branch=dependency/${{ inputs.dependency }}/$VERSION" >> "$GITHUB_OUTPUT"
       fi
 
-  - name: Get branch names.
-    id: branch-names
-    uses: tj-actions/branch-names@v8
+  # - name: Get branch names.
+  #   id: branch-names
+  #   uses: tj-actions/branch-names@v8
 
   - name: Check if PR exists
     id: check-pr-exists
-    uses: tjsr/gh-util-actions/pr-exists@${{ steps.branch-names.outputs.current_branch }}
+    uses: ../pr-exists
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.get-branch.outputs.branch != ''
     with:
       token: ${{ inputs.token }}
