@@ -1,4 +1,4 @@
-name: '@tjsr/gh-util-actions'
+name: '@tjsr/gh-util-actions/npm-dependency-pr'
 description: Update an npm dependency and raise a PR
 author: Tim Rowe <tim@tjsr.id.au>
 inputs:
@@ -157,14 +157,12 @@ runs:
 
   - name: Check if PR exists
     id: check-pr-exists
-    shell: bash
+    uses: ../pr-exists
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.get-branch.outputs.branch != ''
-    env:
-      GITHUB_TOKEN: ${{ inputs.token }}
-      BRANCH_NAME: "dependency/${{ inputs.dependency }}/${{ steps.get-version.outputs.version }}"
-      BRANCH_HEAD: ${{ steps.get-branch.outputs.branch }}
-      GITHUB_REPOSITORY: ${{ inputs.externalRepo || github.repository }}
-    run: . $SCRIPT_DIR/check-pr-exists.sh
+    with:
+      token: ${{ inputs.token }}
+      branchName: ${{ steps.get-branch.outputs.branch }}
+      repository: ${{ inputs.externalRepo || github.repository }}
 
   - name: Update ${{ inputs.dependency }} via npm
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'

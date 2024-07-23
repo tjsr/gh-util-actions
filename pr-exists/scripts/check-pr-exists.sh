@@ -13,23 +13,16 @@ if [ -z "$GITHUB_REPOSITORY" ]; then
     exit 1
 fi
 
-if [ -z "$BRANCH_HEAD" ]; then
-    echo "BRANCH_HEAD must be set.  It must poit to the name of the branch that the PR will be created from."
-    exit 1
-fi
-
 if [ -z "$BRANCH_NAME" ]; then
   echo "BRANCH_NAME must be set.  It must point to the name of the branch that the PR will be created to."
   exit 1
 fi
 
-echo "Checking for PR in $GITHUB_REPOSITORY at $BRANCH_NAME on $BRANCH_HEAD"
-# BRANCH_NAME="dependency/${{ inputs.dependency }}/$VERSION"
-# BRANCH_HEAD="${{ steps.get-branch.outputs.branch }}"
+echo "Checking for PR in $GITHUB_REPOSITORY at $BRANCH_NAME"
 
 prCount=$(gh pr list \
     --repo "$GITHUB_REPOSITORY" \
-    --head "$BRANCH_HEAD" \
+    --head "$BRANCH_NAME" \
     --json number --jq '. | length'
     )
 
