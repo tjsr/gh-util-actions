@@ -122,13 +122,14 @@ runs:
       failOnNoNewVersion: ${{ inputs.failOnNoNewVersion }}
 
   - name: Output the current working directory for debugging.
+    shell: bash
     env:
       SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
     run: echo "Current working directory is $PWD, script dir is $SCRIPT_DIR"
 
   - name: Get version number to use
-    shell: bash
     id: get-version
+    shell: bash
     env:
       LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
       WANTED_VERSION: ${{ steps.get-latest-version.outputs.latest }}
@@ -140,9 +141,9 @@ runs:
 
   - name: Get target branch name
     id: get-branch
+    shell: bash
     env:
       VERSION: ${{ steps.get-version.outputs.version }}
-    shell: bash
     if: steps.get-version.outputs.hasNewVersion == 'true' || inputs.package-version != ''
     run: |
       echo "Value of get-version outputs is ${{ steps.get-version.outputs.version }}"
