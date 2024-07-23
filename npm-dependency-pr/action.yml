@@ -127,26 +127,9 @@ runs:
       LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
       WANTED_VERSION: ${{ steps.get-latest-version.outputs.latest }}
       SPECIFIED_VERSION: ${{ inputs.packageVersion }}
-    run: |
-      if [ -z "$SPECIFIED_VERSION" ]; then
-        if [ -z "$LATEST_VERSION" ]; then
-          echo "No new version found for ${{ inputs.dependency }} when getting version number."
-        else
-          echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
-          if [ "${{ inputs.useLatest }}" == 'true' ]; then
-            echo "Using latest version $LATEST_VERSION for ${{ inputs.dependency }} retrieved from outdated."
-            echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
-          else
-            echo "Using wanted version $WANTED_VERSION for ${{ inputs.dependency }} retrieved from outdated."
-            echo "version=$WANTED_VERSION" >> "$GITHUB_OUTPUT"
-          fi
-          echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
-        fi
-      else
-        echo "Using version $SPECIFIED_VERSION for ${{ inputs.dependency }} provided in parameter."
-        echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
-        echo "version=$SPECIFIED_VERSION" >> "$GITHUB_OUTPUT"
-      fi
+      INPUT_USE_LATEST: ${{ inputs.useLatest }}
+      INPUT_DEPENDENCY: ${{ inputs.dependency }}
+    run: ./scripts/version-select.sh
 
   - name: Get target branch name
     id: get-branch
