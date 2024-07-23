@@ -1,6 +1,8 @@
 name: '@tjsr/gh-util-actions'
 description: Update an npm dependency and raise a PR
 author: Tim Rowe <tim@tjsr.id.au>
+env:
+  SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
 inputs:
   token:
     type: string
@@ -123,8 +125,6 @@ runs:
 
   - name: Output the current working directory for debugging.
     shell: bash
-    env:
-      SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
     run: echo "Current working directory is $PWD, script dir is $SCRIPT_DIR"
 
   - name: Get version number to use
@@ -136,7 +136,6 @@ runs:
       SPECIFIED_VERSION: ${{ inputs.packageVersion }}
       INPUT_USE_LATEST: ${{ inputs.useLatest }}
       INPUT_DEPENDENCY: ${{ inputs.dependency }}
-      SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
     run: $SCRIPT_DIR/version-select.sh
 
   - name: Get target branch name
@@ -162,7 +161,6 @@ runs:
       BRANCH_NAME: "dependency/${{ inputs.dependency }}/${{ steps.get-version.outputs.version }}"
       BRANCH_HEAD: ${{ steps.get-branch.outputs.branch }}
       GITHUB_REPOSITORY: ${{ inputs.externalRepo || github.repository }}
-      SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
     run: $SCRIPT_DIR/check-pr-exists.sh
 
   - name: Update ${{ inputs.dependency }} via npm
