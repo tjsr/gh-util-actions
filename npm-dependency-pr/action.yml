@@ -16,7 +16,7 @@ inputs:
     required: false
   externalRepo:
     type: string
-    description: 'The external repository to run the action against.  eg 'owner/repo'
+    description: 'The external repository to run the action against.  eg \'owner/repo\''
     required: false
   project:
     type: string
