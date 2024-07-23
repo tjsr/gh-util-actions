@@ -160,11 +160,11 @@ runs:
 
   - name: Check if PR exists
     id: check-pr-exists
-    uses: ./pr-exists
+    uses: tjsr/pr-exists
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.get-branch.outputs.branch != ''
     with:
       token: ${{ inputs.token }}
-      branchName: ${{ steps.get-branch.outputs.branch }}
+      branch: ${{ steps.get-branch.outputs.branch }}
       repository: ${{ inputs.externalRepo || github.repository }}
 
   - name: Update ${{ inputs.dependency }} via npm
