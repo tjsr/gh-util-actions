@@ -76,7 +76,7 @@ runs:
   using: 'composite'
   steps:
 
-  - uses: Set script path
+  - name: Set script path
     shell: bash
     run: echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
 
