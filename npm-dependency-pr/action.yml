@@ -1,8 +1,6 @@
 name: '@tjsr/gh-util-actions'
 description: Update an npm dependency and raise a PR
 author: Tim Rowe <tim@tjsr.id.au>
-env:
-  SCRIPT_DIR: ${{ env.GITHUB_ACTION_PATH }}/scripts
 inputs:
   token:
     type: string
@@ -78,6 +76,10 @@ runs:
   using: 'composite'
   steps:
 
+  - uses: Set script path
+    shell: bash
+    run: echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
+
   # Setup .npmrc file to publish to GitHub Packages
   - uses: actions/setup-node@v4
     if: inputs.nodeVersion
@@ -125,7 +127,7 @@ runs:
 
   - name: Output the current working directory for debugging.
     shell: bash
-    run: echo "Current working directory is $PWD, script dir is $SCRIPT_DIR"
+    run: echo "Current working directory is $PWD, script dir is $SCRIPT_DIR, action path is $GITHUB_ACTION_PATH"
 
   - name: Get version number to use
     id: get-version
