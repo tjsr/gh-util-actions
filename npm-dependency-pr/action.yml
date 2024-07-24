@@ -190,8 +190,8 @@ runs:
     shell: bash
     env:
       DEPENDENCY: ${{ inputs.dependency }}
-      HAS_NEW_VERSION: steps.get-version.outputs.hasNewVersion == 'true' || steps.get-version.outputs.hasNewVersion == true
-      PR_EXISTS: steps.check-pr-exists.outputs.exists == 'true' || steps.check-pr-exists.outputs.exists == true
+      HAS_NEW_VERSION: ${{ steps.get-version.outputs.hasNewVersion == 'true' || steps.get-version.outputs.hasNewVersion == true }}
+      PR_EXISTS: ${{ steps.check-pr-exists.outputs.exists == 'true' || steps.check-pr-exists.outputs.exists == true }}
     run: |
       if [ "$HAS_NEW_VERSION" != 'true' ]; then
         echo "Cancelling run because no new version found for $DEPENDENCY"
