@@ -15,6 +15,7 @@ jobs:
   
     - name: Run the npm-dependency-pr util action
       uses: ./npm-dependency-pr
+      id: dep-pr
       with:
         dependency: 'rimraf'
         projectPath: './npm-dependency-pr/tests'
@@ -22,6 +23,11 @@ jobs:
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Remove the created PR
+      shell: bash
+      if: steps.dep-pr.outputs.pullRequestNumber != ''
+      run: echo ACTIONS_RUNNER_HOOK_JOB_COMPLETED="gh pr close -d ${{ steps.dep-pr.outputs.pullRequestNumber }}" >> "$GITHUB_ENV"
+  
   verify-remote-repo:
     permissions:
       contents: write
@@ -48,6 +54,7 @@ jobs:
 
     - name: Run the npm-dependency-pr util action on an external repository
       uses: ./gh-util-actions/npm-dependency-pr
+      id: dep-pr
       with:
         dependency: 'rimraf'
         project: 'npm-project'
@@ -57,6 +64,11 @@ jobs:
         projectPath: "${{ env.TEST_PROJECT_PATH }}"
         repoPath: "${{ env.REMOTE_PROJECT_PATH }}"
         externalRepo: "${{ env.REMOTE_REPO }}"
+    
+    - name: Remove the created PR
+      shell: bash
+      if: steps.dep-pr.outputs.pullRequestNumber != ''
+      run: echo ACTIONS_RUNNER_HOOK_JOB_COMPLETED="gh pr close -d ${{ steps.dep-pr.outputs.pullRequestNumber }}" >> "$GITHUB_ENV"
 
 #   verify-specified:
 #     name: Verify the action when we give a version number
