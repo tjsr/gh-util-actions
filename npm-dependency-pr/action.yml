@@ -80,6 +80,16 @@ runs:
     run: |
       echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
 
+  - name: Cancel the run if no dependency is provided
+    shell: bash
+    env:
+      DEPENDENCY: ${{ inputs.dependency }}
+    run: |
+      if [ -z "$DEPENDENCY" ]; then
+        echo "No dependecy name provided - can't look for updated."
+        echo "status=error" >> "$GITHUB_OUTPUT"
+      fi
+
   # Setup .npmrc file to publish to GitHub Packages
   - uses: actions/setup-node@v4
     if: inputs.nodeVersion
@@ -117,7 +127,7 @@ runs:
 
   - name: Get latest version for ${{ inputs.package }} on ${{ env.PROJECT }}
     id: get-latest-version
-    if: ${{ inputs.packageVersion == '' }}
+    if: inputs.packageVersion == ''
     uses: tjsr/action-npm-outdated@main
     with:
       project: ${{ inputs.project }}
@@ -140,19 +150,27 @@ runs:
       INPUT_DEPENDENCY: ${{ inputs.dependency }}
     run: . $SCRIPT_DIR/version-select.sh
 
-  - name: Get target branch name
+  - name: Cancel the run if there was no new version
+    shell: bash
+    env:
+      DEPENDENCY: ${{ inputs.dependency }}
+      VERSION: ${{ steps.get-version.outputs.version }}
+    run: |
+      if [ -z "$VERSION" ]; then
+        echo "No new version found for $DEPENDENCY when getting target branch name."
+        echo "status=cancelled" >> "$GITHUB_OUTPUT"
+      fi
+
+  - name: Get target branch name or cancel run if there is no new version
     id: get-branch
     shell: bash
     env:
       VERSION: ${{ steps.get-version.outputs.version }}
-    if: steps.get-version.outputs.hasNewVersion == 'true' || inputs.package-version != ''
+      DEPENDENCY: ${{ inputs.dependency }}
     run: |
-      echo "Value of get-version outputs is ${{ steps.get-version.outputs.version }}"
-      if [ -z "$VERSION" ]; then
-        echo "No new version found for ${{ inputs.dependency }} when getting target branch name."
-      else
-        echo "branch=dependency/${{ inputs.dependency }}/$VERSION" >> "$GITHUB_OUTPUT"
-      fi
+      BRANCH=dependency/$DEPENDENCY/$VERSION
+      echo "Branch name for dependency $DEPENDENCY version $VERSION will be $BRANCH"
+      echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
   # - name: Get branch names.
   #   id: branch-names
@@ -170,13 +188,17 @@ runs:
   - name: Verify update was necessary
     id: update-status
     shell: bash
+    env:
+      DEPENDENCY: ${{ inputs.dependency }}
+      HAS_NEW_VERSION: ${{ steps.get-version.outputs.hasNewVersion }} || 'false'
+      PR_EXISTS: ${{ steps.check-pr-exists.outputs.exists }} || 'false'
     run: |
-      if [ "${{ steps.get-version.outputs.hasNewVersion }}" != 'true' ]; then
-        echo "Cancelling run because no new version found for ${{ inputs.dependency }}"
+      if [ "$HAS_NEW_VERSION" != 'true' ]; then
+        echo "Cancelling run because no new version found for $DEPENDENCY"
         echo "status=cancelled" >> "$GITHUB_OUTPUT"
       fi
-      if [ "${{ steps.check-pr-exists.outputs.exists }}" != 'false' ]; then
-        echo "Cancelling run because PR already exists for ${{ inputs.dependency }}"
+      if [ "$PR_EXISTS" != 'false' ]; then
+        echo "Cancelling run because PR already exists for $DEPENDENCY"
         echo "status=cancelled" >> "$GITHUB_OUTPUT"
       fi
 
