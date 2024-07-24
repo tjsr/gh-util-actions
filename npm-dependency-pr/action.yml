@@ -134,7 +134,7 @@ runs:
     shell: bash
     env:
       LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
-      WANTED_VERSION: ${{ steps.get-latest-version.outputs.latest }}
+      WANTED_VERSION: ${{ steps.get-latest-version.outputs.wanted }}
       SPECIFIED_VERSION: ${{ inputs.packageVersion }}
       INPUT_USE_LATEST: ${{ inputs.useLatest }}
       INPUT_DEPENDENCY: ${{ inputs.dependency }}
