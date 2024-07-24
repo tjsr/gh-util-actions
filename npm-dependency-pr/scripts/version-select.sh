@@ -33,21 +33,21 @@ else
   echo "specified=false" >> "$GITHUB_OUTPUT"
 fi
 
-if [ -z "$LATEST_VERSION" ] && [ "$INPUT_USE_LATEST" == 'true' ]; then
+if [ -z "$LATEST_VERSION" ] && [ "$INPUT_USE_LATEST" = 'true' ]; then
   echo "LATEST_VERSION is not set but INPUT_USE_LATEST is true when trying to upgrade $INPUT_DEPENDENCY.  Can not continue."
   echo "hasNewVersion=false" >> "$GITHUB_OUTPUT"
   echo "specified=false" >> "$GITHUB_OUTPUT"
   exit 1
 fi
 
-if [ -z "$WANTED_VERSION" ] && [ "$INPUT_USE_LATEST" == 'false' ]; then
+if [ -z "$WANTED_VERSION" ] && [ "$INPUT_USE_LATEST" = 'false' ]; then
   echo "WANTED_VERSION is not set but INPUT_USE_LATEST is false when trying to upgrade $INPUT_DEPENDENCY.  Can not continue."
   echo "hasNewVersion=false" >> "$GITHUB_OUTPUT"
   exit 1
 fi
 
 echo "hasNewVersion=true" >> "$GITHUB_OUTPUT"
-if [ "$INPUT_USE_LATEST" == 'true' ]; then
+if [ "$INPUT_USE_LATEST" = 'true' ]; then
   echo "Using latest version $LATEST_VERSION for $INPUT_DEPENDENCY retrieved from outdated."
   echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
 else
