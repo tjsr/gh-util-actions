@@ -198,8 +198,8 @@ runs:
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
     uses: peter-evans/create-pull-request@v6
     with:
-      commit-message: Update ${{ input.dependency }} to ${{ steps.get-version.outputs.version }}
-      title: Update ${{ input.dependency }} to ${{ steps.get-version.outputs.version }}
+      commit-message: Update ${{ inputs.dependency }} to ${{ steps.get-version.outputs.version }}
+      title: Update ${{ inputs.dependency }} to ${{ steps.get-version.outputs.version }}
       base: ${{ steps.base-branch.outputs.branch }}
       branch: ${{ steps.get-branch.outputs.branch }}
       reviewers: ${{ inputs.reviewers || github.actor || github.triggering_actor || github.repository_owner }}
