@@ -167,6 +167,19 @@ runs:
       branch: ${{ steps.get-branch.outputs.branch }}
       repository: ${{ inputs.externalRepo || github.repository }}
 
+  - name: Verify update was necessary
+    id: update-status
+    shell: bash
+    run: |
+      if [ "${{ steps.get-version.outputs.hasNewVersion }}" != 'true' ]; then
+        echo "Cancelling run because no new version found for ${{ inputs.dependency }}"
+        echo "status=cancelled" >> "$GITHUB_OUTPUT"
+      fi
+      if [ "${{ steps.check-pr-exists.outputs.exists }}" != 'false' ]; then
+        echo "Cancelling run because PR already exists for ${{ inputs.dependency }}"
+        echo "status=cancelled" >> "$GITHUB_OUTPUT"
+      fi
+
   - name: Update ${{ inputs.dependency }} via npm
     if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
     id: update-package
@@ -177,19 +190,6 @@ runs:
       fi
       echo Installing updated npm depenency ${{ inputs.dependency }}@${{ steps.get-version.outputs.version }}
       npm install --save ${{ inputs.dependency }}@${{ steps.get-version.outputs.version }}
-
-  - name: Verify update was necessary
-    if: steps.get-version.outputs.hasNewVersion != 'true' || steps.check-pr-exists.outputs.exists != 'false'
-    id: update-status
-    shell: bash
-    run: |
-      if [ "${{ steps.get-version.outputs.hasNewVersion }}" != 'true' ]; then
-        echo "Cancelling run because no new version found for ${{ inputs.dependency }}"
-      fi
-      if [ "${{ steps.check-pr-exists.outputs.exists }}" != 'false' ]; then
-        echo "Cancelling run because PR already exists for ${{ inputs.dependency }}"
-      fi
-      echo "status=cancelled" >> "$GITHUB_OUTPUT"
 
   - name: Extract base branch name
     id: base-branch
