@@ -182,7 +182,14 @@ runs:
     if: steps.get-version.outputs.hasNewVersion != 'true' || steps.check-pr-exists.outputs.exists != 'false'
     id: update-status
     shell: bash
-    run: echo "status=cancelled" >> "$GITHUB_OUTPUT"
+    run: |
+      if [ "${{ steps.get-version.outputs.hasNewVersion }}" != 'true' ]; then
+        echo "Cancelling run because no new version found for ${{ inputs.dependency }}"
+      fi
+      if [ "${{ steps.check-pr-exists.outputs.exists }}" != 'false' ]; then
+        echo "Cancelling run because PR already exists for ${{ inputs.dependency }}"
+      fi
+      echo "status=cancelled" >> "$GITHUB_OUTPUT"
 
   - name: Extract base branch name
     id: base-branch
