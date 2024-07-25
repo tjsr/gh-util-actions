@@ -42,6 +42,7 @@ jobs:
     env:
       REMOTE_PROJECT_PATH: "${{ github.workspace }}/action-npm-outdated"
       REMOTE_REPO: 'tjsr/action-npm-outdated'
+      REMOTE_REPO_BRANCH: 'main'
       TEST_PROJECT_PATH: "${{ github.workspace }}/action-npm-outdated/tests/npm-project"
     name: Verify the action against a different repository
     runs-on: ubuntu-latest
@@ -54,8 +55,8 @@ jobs:
     - name: Check out repository code for an external project's repo
       uses: actions/checkout@v4
       with:
-        repository: 'tjsr/action-npm-outdated'
-        ref: 'main'
+        repository: ${{ env.REMOTE_REPO }}
+        ref: ${{ env.REMOTE_REPO_BRANCH }}
         path: 'action-npm-outdated'
 
     - name: Run the npm-dependency-pr util action on an external repository
@@ -69,6 +70,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         projectPath: "${{ env.TEST_PROJECT_PATH }}"
         repoPath: "${{ env.REMOTE_PROJECT_PATH }}"
+        externalRepoBaseBranch: ${{ env.REMOTE_REPO_BRANCH }}
         externalRepo: "${{ env.REMOTE_REPO }}"
     
     - name: Remove the created PR
