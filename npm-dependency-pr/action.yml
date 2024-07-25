@@ -159,6 +159,7 @@ runs:
       if [ -z "$VERSION" ]; then
         echo "No new version found for $DEPENDENCY when getting target branch name."
         echo "status=cancelled" >> "$GITHUB_OUTPUT"
+        exit 78
       fi
 
   - name: Get target branch name
@@ -207,6 +208,9 @@ runs:
       fi
       if [ "$CANCEL" = 'false' ]; then
         echo "Update required, proceeding with update."
+      else
+        ## Exit with special cancelled return code
+        exit 78
       fi
 
   - name: Update ${{ inputs.dependency }} via npm

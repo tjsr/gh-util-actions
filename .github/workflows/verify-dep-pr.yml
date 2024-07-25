@@ -25,14 +25,14 @@ jobs:
 
     - name: Remove the created PR
       shell: bash
-      if: ${{ steps.dep-pr.conclusion != 'success' }}
-      run: echo status=failed >> "$GITHUB_OUTPUT"
-
-    - name: Remove the created PR
-      shell: bash
       if: ${{ steps.dep-pr.outputs.pullRequestNumber != '' }}
       run: echo ACTIONS_RUNNER_HOOK_JOB_COMPLETED="gh pr close -d ${{ steps.dep-pr.outputs.pullRequestNumber }}" >> "$GITHUB_ENV"
   
+    - name: Fail if the pr step did not finish with a success code.
+      shell: bash
+      if: ${{ steps.dep-pr.conclusion != 'success' }}
+      run: exit 1
+
   verify-remote-repo:
     permissions:
       contents: write
@@ -74,6 +74,11 @@ jobs:
       shell: bash
       if: steps.dep-pr.outputs.pullRequestNumber != ''
       run: echo ACTIONS_RUNNER_HOOK_JOB_COMPLETED="gh pr close -d ${{ steps.dep-pr.outputs.pullRequestNumber }}" >> "$GITHUB_ENV"
+
+    - name: Fail if the pr step did not finish with a success code.
+      shell: bash
+      if: ${{ steps.dep-pr.conclusion != 'success' }}
+      run: exit 1
 
 #   verify-specified:
 #     name: Verify the action when we give a version number
