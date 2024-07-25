@@ -243,9 +243,15 @@ runs:
   - name: Extract base branch name
     id: base-branch
     # if: ${{ steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false' }}
+    env:
+      EXTERNAL_BASE: ${{ inputs.externalRepoBaseBranch }}
     shell: bash
     run: |
-      BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+      if [ ! -z ["$EXTERNAL_BASE" ]; then
+        BASE_BRANCH=$EXTERNAL_BASE
+      else
+        BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+      fi
       echo "PR will be based off branch $BASE_BRANCH"
       echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
 
