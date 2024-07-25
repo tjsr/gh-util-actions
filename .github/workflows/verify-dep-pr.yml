@@ -72,6 +72,7 @@ jobs:
         externalRepo: "${{ env.REMOTE_REPO }}"
     
     - name: Remove the created PR
+      id: set-post-action
       shell: bash
       if: steps.dep-pr.outputs.pullRequestNumber != ''
       run: echo ACTIONS_RUNNER_HOOK_JOB_COMPLETED="gh pr close -d ${{ steps.dep-pr.outputs.pullRequestNumber }}" >> "$GITHUB_ENV"
