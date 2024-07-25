@@ -214,7 +214,7 @@ runs:
       fi
 
   - name: Update ${{ inputs.dependency }} via npm
-    if: ${{ steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false' }}
+    # if: ${{ steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false' }}
     id: update-package
     shell: bash
     run: |
@@ -226,7 +226,7 @@ runs:
 
   - name: Extract base branch name
     id: base-branch
-    if: ${{ steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false' }}
+    # if: ${{ steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false' }}
     shell: bash
     run: |
       BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
@@ -235,7 +235,7 @@ runs:
 
   - name: Create a Pull Request for the changes
     id: create-pr
-    if: ${{ steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false' }}
+    # if: ${{ steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false' }}
     uses: peter-evans/create-pull-request@v6
     with:
       commit-message: Update ${{ inputs.dependency }} to ${{ steps.get-version.outputs.version }}
