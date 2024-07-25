@@ -85,7 +85,7 @@ runs:
       EXTERNAL_REPO: ${{ inputs.externalRepo }}
       EXTERNAL_REPO_BASE_BRANCH: ${{ inputs.externalRepoBaseBranch }}
     run: |
-      if [ -z "$EXTERNAL_REPO" ] && [ ! -z "$EXTERNAL_REPO_BASE_BRANCH" ]; then
+      if [ ! -z "$EXTERNAL_REPO" ] && [ -z "$EXTERNAL_REPO_BASE_BRANCH" ]; then
         echo "No base branch provided for external repo - must be provided."
         echo "status=error" >> "$GITHUB_OUTPUT"
         exit 1
