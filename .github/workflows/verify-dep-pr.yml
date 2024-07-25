@@ -25,7 +25,7 @@ jobs:
 
     - name: Remove the created PR
       shell: bash
-      if: ${{ steps.dep-pr.outputs.pullRequestNumber == '' }}
+      if: ${{ steps.dep-pr.conclusion != 'success' }}
       run: echo status=failed >> "$GITHUB_OUTPUT"
 
     - name: Remove the created PR
