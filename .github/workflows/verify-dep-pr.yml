@@ -67,7 +67,7 @@ jobs:
         project: 'npm-project'
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.ACTION_CI_PAT }}
         projectPath: "${{ env.TEST_PROJECT_PATH }}"
         repoPath: "${{ env.REMOTE_PROJECT_PATH }}"
         externalRepoBaseBranch: ${{ env.REMOTE_REPO_BRANCH }}
