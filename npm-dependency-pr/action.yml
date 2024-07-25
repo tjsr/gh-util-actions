@@ -18,6 +18,10 @@ inputs:
     type: string
     description: 'The external repository to run the action against.  eg owner/repo'
     required: false
+  externalRepoBaseBranch:
+    type: string
+    description: 'The branch to base the PR on, mandatory if the target is an external repository'
+    required: false
   project:
     type: string
     description: 'The target project name that must be the owner of the package. This is usually the directory name the package.json file resides under, not the name field in package.json'
@@ -75,6 +79,18 @@ runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
   steps:
+  - name: Verify base branch is set if using an external repo
+    shell: bash
+    env:
+      EXTERNAL_REPO: ${{ inputs.externalRepo }}
+      EXTERNAL_REPO_BASE_BRANCH: ${{ inputs.externalRepoBaseBranch }}
+    run: |
+      if [ -z "$EXTERNAL_REPO" ] && [ ! -z "$EXTERNAL_REPO_BASE_BRANCH" ]; then
+        echo "No base branch provided for external repo - must be provided."
+        echo "status=error" >> "$GITHUB_OUTPUT"
+        exit 1
+      fi
+
   - name: Set script path
     shell: bash
     run: |
