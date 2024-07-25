@@ -191,7 +191,7 @@ runs:
     env:
       DEPENDENCY: ${{ inputs.dependency }}
       HAS_NEW_VERSION: ${{ steps.get-version.outputs.hasNewVersion == 'true' }}
-      PR_EXISTS: ${{ steps.check-pr-exists.outputs.exists = true }}
+      PR_EXISTS: ${{ steps.check-pr-exists.outputs.exists == 'true' }}
     run: |
       echo "Verifying that an update is necessary for $DEPENDENCY..."
       CANCEL=false
