@@ -161,7 +161,7 @@ runs:
         echo "status=cancelled" >> "$GITHUB_OUTPUT"
       fi
 
-  - name: Get target branch name or cancel run if there is no new version
+  - name: Get target branch name
     id: get-branch
     shell: bash
     env:
@@ -193,13 +193,20 @@ runs:
       HAS_NEW_VERSION: ${{ steps.get-version.outputs.hasNewVersion == 'true' || steps.get-version.outputs.hasNewVersion == true }}
       PR_EXISTS: ${{ steps.check-pr-exists.outputs.exists == 'true' || steps.check-pr-exists.outputs.exists == true }}
     run: |
+      echo "Verifying that an update is necessary for $DEPENDENCY..."
+      CANCEL=false
       if [ "$HAS_NEW_VERSION" != 'true' ]; then
         echo "Cancelling run because no new version found for $DEPENDENCY"
         echo "status=cancelled" >> "$GITHUB_OUTPUT"
+        CANCEL=true
       fi
       if [ "$PR_EXISTS" != 'false' ]; then
         echo "Cancelling run because PR already exists for $DEPENDENCY"
         echo "status=cancelled" >> "$GITHUB_OUTPUT"
+        CANCEL=true
+      fi
+      if [ "$CANCEL" = 'false' ]; then
+        echo "Update required, proceeding with update."
       fi
 
   - name: Update ${{ inputs.dependency }} via npm
