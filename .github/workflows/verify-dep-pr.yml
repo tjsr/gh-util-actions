@@ -79,7 +79,7 @@ jobs:
 
     - name: Fail if the pr step did not finish with a success code.
       shell: bash
-      if: ${{ steps.dep-pr.conclusion != 'success' }}
+      if: ${{ steps.dep-pr.conclusion != 'success' || steps.set-post-action.conclusion != 'success' }}
       run: exit 1
 
 #   verify-specified:
