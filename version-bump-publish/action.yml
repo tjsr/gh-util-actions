@@ -51,7 +51,8 @@ runs:
       fi
 
   # Setup .npmrc file to publish to GitHub Packages
-  - uses: actions/setup-node@v4
+  - name: "Setup .npmrc file for scope @${{ github.organization }}"
+    uses: actions/setup-node@v4
     if: inputs.nodeVersion
     with:
       node-version: ${{ inputs.nodeVersion}}
