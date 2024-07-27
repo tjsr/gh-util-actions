@@ -18,7 +18,7 @@ inputs:
     default: false
   noTag:
     type: boolean
-    description: 'Bump the version number, but don't tag the commit'
+    description: "Bump the version number, but don't tag the commit"
     required: false
     default: false
   npmVersion:
