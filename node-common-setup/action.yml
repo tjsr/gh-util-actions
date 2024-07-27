@@ -30,16 +30,17 @@ runs:
   # Setup .npmrc file to publish to GitHub Packages
   - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
     uses: actions/setup-node@v4
-    if: inputs.nodeVersion
     with:
+      always-auth: true
       node-version: ${{ inputs.nodeVersion}}
-      # cache: 'npm'
+      cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
       # Defaults to the user or organization that owns the workflow file
       scope: "${{ inputs.scope }}"
       token: "${{ inputs.token }}"
 
-  - name: Install npm ${{ inputs.npmVersion }}
+  - name: Install npm ${{ inputs.npmVersion || ' or skip if no version specified' }}
+    if: ${{ inputs.npmVersion != '' }}
     run: npm install -g npm@${{ inputs.npmVersion }}
     shell: bash
 
