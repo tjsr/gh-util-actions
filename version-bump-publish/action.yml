@@ -21,16 +21,6 @@ inputs:
     description: "Bump the version number, but don't tag the commit"
     required: false
     default: false
-  npmVersion:
-    type: string
-    description: 'The npm version to install before running the action'
-    default: 'latest'
-    required: false
-  nodeVersion:
-    type: string
-    description: 'The node version to install before running the action'
-    required: false
-    default: '20.15.1'
 
 outputs:
   version:
