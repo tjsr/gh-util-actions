@@ -2,10 +2,6 @@ name: '@tjsr/gh-util-actions/version-bump-publish'
 description: Update an npm dependency and raise a PR
 author: Tim Rowe <tim@tjsr.id.au>
 inputs:
-  token:
-    type: string
-    description: 'The GitHub token to use for PR creation'
-    required: false
   patchlevel:
     type: string
     description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
