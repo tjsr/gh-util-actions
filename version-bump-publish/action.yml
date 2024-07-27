@@ -94,7 +94,7 @@ runs:
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 
   - name: Publish the package
-    if: !inputs.noPublish
+    if: ${{ inputs.noPublish != 'true' }}
     id: publish-package
     shell: bash
     run: |
