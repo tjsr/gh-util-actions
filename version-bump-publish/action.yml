@@ -17,6 +17,11 @@ inputs:
     description: "Bump the version number, but don't tag the commit"
     required: false
     default: false
+  cacheKey:
+    type: string
+    description: 'The key to use for the node cache'
+    required: false
+    default: 'node-cache'
 
 outputs:
   version:
@@ -35,6 +40,14 @@ runs:
         echo "Invalid patchlevel value provided: ${{ inputs.patchlevel }}"
         exit 1
       fi
+
+  - name: Cache node config and node_modules
+    uses: actions/cache@main
+    with:
+      path: |
+        ~/.npmrc
+        ~/node_modules
+      key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
 
   - name: Install ${{ env.PROJECT }} dependencies
     id: install

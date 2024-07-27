@@ -21,6 +21,11 @@ inputs:
     type: string
     description: 'The GitHub token to use for PR creation'
     required: false
+  cacheKey:
+    type: string
+    description: 'The key to use for the cache'
+    required: false
+    default: 'node-cache'
 
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
@@ -44,13 +49,10 @@ runs:
     run: npm install -g npm@${{ inputs.npmVersion }}
     shell: bash
 
-  - name: Cache node modules
-    id: cache-node_modules
+  - name: Cache node config and node_modules
     uses: actions/cache@main
-    env:
-      cache-name: cache-node-modules
     with:
-      # npm cache files are stored in `~/.npm` on Linux/macOS
-      path: ~/node_modules
-      # todo - change this so we are less restrictive on package-lock changes
-      key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+      path: |
+        ~/.npmrc
+        ~/node_modules
+      key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
