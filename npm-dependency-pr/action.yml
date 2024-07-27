@@ -1,4 +1,4 @@
-name: '@tjsr/gh-util-actions'
+name: '@tjsr/gh-util-actions/npm-dependency-pr'
 description: Update an npm dependency and raise a PR
 author: Tim Rowe <tim@tjsr.id.au>
 inputs:
