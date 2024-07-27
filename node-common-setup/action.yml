@@ -1,0 +1,50 @@
+name: '@tjsr/gh-util-actions/node-common-setup'
+description: Common node setup with cache for own projects
+author: Tim Rowe <tim@tjsr.id.au>
+inputs:
+  npmVersion:
+    type: string
+    description: 'The npm version to install before running the action'
+    default: 'latest'
+    required: false
+  nodeVersion:
+    type: string
+    description: 'The node version to install before running the action'
+    required: false
+    default: '20.15.1'
+  scope:
+    type: string
+    description: 'The scope to use for the .npmrc file if it needs overriding'
+    required: false
+    default: '@tjsr'
+
+runs:
+  # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
+  using: 'composite'
+  steps:
+
+  # Setup .npmrc file to publish to GitHub Packages
+  - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
+    uses: actions/setup-node@v4
+    if: inputs.nodeVersion
+    with:
+      node-version: ${{ inputs.nodeVersion}}
+      # cache: 'npm'
+      registry-url: 'https://npm.pkg.github.com'
+      # Defaults to the user or organization that owns the workflow file
+      scope: "@${{ inputs.scope }}"
+
+  - name: Install npm ${{ inputs.npmVersion }}
+    run: npm install -g npm@${{ inputs.npmVersion }}
+    shell: bash
+
+  - name: Cache node modules
+    id: cache-node_modules
+    uses: actions/cache@main
+    env:
+      cache-name: cache-node-modules
+    with:
+      # npm cache files are stored in `~/.npm` on Linux/macOS
+      path: ~/node_modules
+      # todo - change this so we are less restrictive on package-lock changes
+      key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}

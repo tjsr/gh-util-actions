@@ -50,32 +50,6 @@ runs:
         exit 1
       fi
 
-  # Setup .npmrc file to publish to GitHub Packages
-  - name: "Setup .npmrc file for scope @${{ github.organization }}"
-    uses: actions/setup-node@v4
-    if: inputs.nodeVersion
-    with:
-      node-version: ${{ inputs.nodeVersion}}
-      # cache: 'npm'
-      registry-url: 'https://npm.pkg.github.com'
-      # Defaults to the user or organization that owns the workflow file
-      scope: "@${{ github.organization }}"
-
-  - name: Install npm ${{ inputs.npmVersion }}
-    run: npm install -g npm@${{ inputs.npmVersion }}
-    shell: bash
-
-  - name: Cache node modules
-    id: cache-node_modules
-    uses: actions/cache@main
-    env:
-      cache-name: cache-node-modules
-    with:
-      # npm cache files are stored in `~/.npm` on Linux/macOS
-      path: ~/node_modules
-      # todo - change this so we are less restrictive on package-lock changes
-      key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-
   - name: Install ${{ env.PROJECT }} dependencies
     id: install
     shell: bash
@@ -100,4 +74,3 @@ runs:
     shell: bash
     run: |
       npm publish --dry-run
-
