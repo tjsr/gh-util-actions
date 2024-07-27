@@ -13,7 +13,7 @@ inputs:
     default: 'prerelease'
   noPublish:
     type: boolean
-    description: 'Bump the version number, but don't publish the package'
+    description: "Bump the version number, but don't publish the package"
     required: false
     default: false
   noTag:
