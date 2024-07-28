@@ -122,6 +122,7 @@ runs:
       fi
       NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG --preid dev)
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
+      echo "Project version number bumped to $NEW_VERSION_NUMBER"
 
   # - name: Get the base branch this version is based on.
   #   id: base-branch
