@@ -50,8 +50,6 @@ outputs:
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
-  env:
-    NODE_AUTH_TOKEN: ${{ inputs.token || secrets.GITHUB_TOKEN }}
   steps:
   - name: Validate patchlevel input
     id: validate-patchlevel
@@ -94,6 +92,8 @@ runs:
 
   - name: Install ${{ env.PROJECT }} dependencies
     id: install
+    env:
+      NODE_AUTH_TOKEN: ${{ inputs.token }}
     shell: bash
     run: |
       echo "Version:" 
