@@ -75,7 +75,7 @@ runs:
   # Setup .npmrc file to publish to GitHub Packages
   - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
     uses: actions/setup-node@v4
-    if: !steps.node-cache.outputs.cache-hit
+    if: ${{ steps.node-cache.outputs.cache-hit != true }}
     with:
       always-auth: true
       node-version: ${{ inputs.node-version}}
