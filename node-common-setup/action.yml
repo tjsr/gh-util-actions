@@ -41,7 +41,7 @@ runs:
       cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
       scope: "${{ inputs.scope }}"
-      token: "${{ inputs.token }}"
+      # token: "${{ inputs.token }}"
 
   - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
     if: ${{ inputs.npm-version != '' }}

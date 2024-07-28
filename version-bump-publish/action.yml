@@ -51,6 +51,10 @@ runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
   steps:
+
+  env:
+    NODE_AUTH_TOKEN: ${{ inputs.token || secrets.GITHUB_TOKEN }}
+
   - name: Validate patchlevel input
     id: validate-patchlevel
     shell: bash
@@ -83,7 +87,7 @@ runs:
       cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
       scope: "${{ inputs.scope }}"
-      token: "${{ inputs.token }}"
+      # token: "${{ inputs.token }}"
 
   - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
     # if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
