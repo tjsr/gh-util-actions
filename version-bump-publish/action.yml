@@ -65,6 +65,7 @@ runs:
     id: node-cache
     with:
       path: |
+        /home/runner/.npm
         /home/runner/work/_temp/.npmrc
         ~/node_modules
       key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
@@ -72,29 +73,34 @@ runs:
         ${{ runner.OS }}-npm-cache-${{ github.github.run_id }}-${{ github.run_number }}
         ${{ runner.OS }}-npm-cache-
 
-  # Setup .npmrc file to publish to GitHub Packages
-  - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
-    uses: actions/setup-node@v4
-    if: ${{ steps.node-cache.outputs.cache-hit != true }}
-    with:
-      always-auth: true
-      node-version: ${{ inputs.node-version}}
-      cache: 'npm'
-      registry-url: 'https://npm.pkg.github.com'
-      scope: "${{ inputs.scope }}"
-      token: "${{ inputs.token }}"
+  # # Setup .npmrc file to publish to GitHub Packages
+  # - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
+  #   uses: actions/setup-node@v4
+  #   # if: ${{ steps.node-cache.outputs.cache-hit != true }}
+  #   with:
+  #     always-auth: true
+  #     node-version: ${{ inputs.node-version}}
+  #     cache: 'npm'
+  #     registry-url: 'https://npm.pkg.github.com'
+  #     scope: "${{ inputs.scope }}"
+  #     token: "${{ inputs.token }}"
 
-  - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
-    if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
-    run: npm install -g npm@${{ inputs.npm-version }}
-    shell: bash
+  # - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
+  #   # if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
+  #   run: npm install -g npm@${{ inputs.npm-version }}
+  #   shell: bash
 
   - name: Install ${{ env.PROJECT }} dependencies
     id: install
     shell: bash
     run: |
+      echo "Version:" 
+      npm --version
+      echo "Config:" 
       cat $NPM_CONFIG_USERCONFIG
+      echo "Prefix:" 
       npm config get prefix
+      echo "CI:" 
       npm ci
 
   - name: Bump the patch version
