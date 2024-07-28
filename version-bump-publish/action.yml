@@ -139,4 +139,6 @@ runs:
       NODE_AUTH_TOKEN: "${{ inputs.token }}"
     shell: bash
     run: |
-      npm publish --dry-run
+      npm publish
+      git push --tags
+
