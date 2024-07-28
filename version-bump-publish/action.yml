@@ -106,6 +106,7 @@ runs:
       npm ci
 
   - name: Set the github user config for the actions bot.
+    shell: bash
     run: |
       git config --global user.name "github-actions[bot]"
       git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -121,6 +122,15 @@ runs:
       fi
       NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG --preid dev)
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
+
+  # - name: Get the base branch this version is based on.
+  #   id: base-branch
+  #   if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
+  #   shell: bash
+  #   run: |
+  #     BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+  #     echo "PR will be based off branch $BASE_BRANCH"
+  #     echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
 
   - name: Publish the package
     id: publish-package
