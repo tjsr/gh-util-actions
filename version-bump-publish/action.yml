@@ -48,10 +48,6 @@ outputs:
     value: ${{ steps.bump-version.outputs.version }}
 
 runs:
-  permissions:
-    contents: write
-    packages: write
-
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
   using: 'composite'
   steps:
