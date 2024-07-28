@@ -42,7 +42,7 @@ runs:
       fi
 
   - name: Cache node config and node_modules
-    uses: actions/cache@main
+    uses: actions/cache/restore@main
     with:
       path: |
         ~/.npmrc

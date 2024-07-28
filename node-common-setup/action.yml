@@ -56,3 +56,8 @@ runs:
         ~/.npmrc
         ~/node_modules
       key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
+
+  - name: Force-save cache
+    uses: actions/cache/save@main
+    with:
+      key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
