@@ -49,15 +49,10 @@ runs:
     run: npm install -g npm@${{ inputs.npmVersion }}
     shell: bash
 
-  - name: Cache node config and node_modules
-    uses: actions/cache@main
+  - name: Force-save cache
+    uses: actions/cache/save@main
     with:
       path: |
         ~/.npmrc
         ~/node_modules
-      key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
-
-  - name: Force-save cache
-    uses: actions/cache/save@main
-    with:
       key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
