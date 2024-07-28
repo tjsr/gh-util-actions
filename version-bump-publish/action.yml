@@ -2,11 +2,15 @@ name: '@tjsr/gh-util-actions/version-bump-publish'
 description: Update an npm dependency and raise a PR
 author: Tim Rowe <tim@tjsr.id.au>
 inputs:
-  patchlevel:
+  token:
     type: string
-    description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
+    description: 'The GitHub token to use for PR creation'
+    required: true
+  cache-key:
+    type: string
+    description: 'The key to use for the node cache'
     required: false
-    default: 'prerelease'
+    default: 'node-cache'
   no-publish:
     type: boolean
     description: "Bump the version number, but don't publish the package"
@@ -27,11 +31,16 @@ inputs:
     description: 'The npm version to install before running the action'
     default: 'latest'
     required: false
-  cache-key:
+  patchlevel:
     type: string
-    description: 'The key to use for the node cache'
+    description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
     required: false
-    default: 'node-cache'
+    default: 'prerelease'
+  scope:
+    type: string
+    description: 'The scope to use for the .npmrc file if it needs overriding'
+    required: false
+    default: '@tjsr'
 
 outputs:
   version:
