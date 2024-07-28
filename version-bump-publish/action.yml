@@ -7,17 +7,22 @@ inputs:
     description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
     required: false
     default: 'prerelease'
-  noPublish:
+  no-publish:
     type: boolean
     description: "Bump the version number, but don't publish the package"
     required: false
     default: false
-  noTag:
+  no-tag:
     type: boolean
     description: "Bump the version number, but don't tag the commit"
     required: false
     default: false
-  cacheKey:
+  node-version:
+    type: string
+    description: 'The node version to install before running the action'
+    required: false
+    default: '20.15.1'
+  cache-key:
     type: string
     description: 'The key to use for the node cache'
     required: false
@@ -42,12 +47,34 @@ runs:
       fi
 
   - name: Cache node config and node_modules
-    uses: actions/cache/restore@main
+    uses: actions/cache@main
+    id: node-cache
     with:
       path: |
         ~/.npmrc
         ~/node_modules
-      key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
+      key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
+      restore-keys: |
+        ${{ runner.OS }}-npm-cache-${{ github.github.run_id }}-${{ github.run_number }}
+        ${{ runner.OS }}-npm-cache-
+
+  # Setup .npmrc file to publish to GitHub Packages
+  - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
+    uses: actions/setup-node@v4
+    if: !steps.node-cache.outputs.cache-hit
+    with:
+      always-auth: true
+      node-version: ${{ inputs.node-version}}
+      cache: 'npm'
+      registry-url: 'https://npm.pkg.github.com'
+      scope: "${{ inputs.scope }}"
+      token: "${{ inputs.token }}"
+      always-auth: true
+
+  - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
+    if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
+    run: npm install -g npm@${{ inputs.npm-version }}
+    shell: bash
 
   - name: Install ${{ env.PROJECT }} dependencies
     id: install
@@ -60,7 +87,7 @@ runs:
     id: bump-version
     shell: bash
     run: |
-      if [ -z "${{ inputs.noTag }}" ]; then
+      if [ -z "${{ inputs.no-tag }}" ]; then
         NO_TAG="--no-git-tag-version"
       else
         $NO_TAG=""
@@ -69,7 +96,7 @@ runs:
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 
   - name: Publish the package
-    if: ${{ inputs.noPublish != 'true' }}
+    if: ${{ inputs.no-publish != 'true' }}
     id: publish-package
     shell: bash
     run: |

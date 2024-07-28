@@ -2,12 +2,12 @@ name: '@tjsr/gh-util-actions/node-common-setup'
 description: Common node setup with cache for own projects
 author: Tim Rowe <tim@tjsr.id.au>
 inputs:
-  npmVersion:
+  npm-version:
     type: string
     description: 'The npm version to install before running the action'
     default: 'latest'
     required: false
-  nodeVersion:
+  node-version:
     type: string
     description: 'The node version to install before running the action'
     required: false
@@ -20,8 +20,8 @@ inputs:
   token:
     type: string
     description: 'The GitHub token to use for PR creation'
-    required: false
-  cacheKey:
+    required: true
+  cache-key:
     type: string
     description: 'The key to use for the cache'
     required: false
@@ -37,16 +37,16 @@ runs:
     uses: actions/setup-node@v4
     with:
       always-auth: true
-      node-version: ${{ inputs.nodeVersion}}
+      node-version: ${{ inputs.node-version}}
       cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
-      # Defaults to the user or organization that owns the workflow file
       scope: "${{ inputs.scope }}"
       token: "${{ inputs.token }}"
+      always-auth: true
 
-  - name: Install npm ${{ inputs.npmVersion || ' or skip if no version specified' }}
-    if: ${{ inputs.npmVersion != '' }}
-    run: npm install -g npm@${{ inputs.npmVersion }}
+  - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
+    if: ${{ inputs.npm-version != '' }}
+    run: npm install -g npm@${{ inputs.npm-version }}
     shell: bash
 
   - name: Force-save cache
@@ -55,4 +55,7 @@ runs:
       path: |
         ~/.npmrc
         ~/node_modules
-      key: ${{ inputs.cacheKey || format('node-cache-{0}', github.run_number)}}
+      key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
+      restore-keys: |
+        ${{ runner.OS }}-npm-cache-${{ github.github.run_id }}-${{ github.run_number }}
+        ${{ runner.OS }}-npm-cache-
