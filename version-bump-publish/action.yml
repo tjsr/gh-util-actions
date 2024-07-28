@@ -83,7 +83,6 @@ runs:
       registry-url: 'https://npm.pkg.github.com'
       scope: "${{ inputs.scope }}"
       token: "${{ inputs.token }}"
-      always-auth: true
 
   - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
     if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
