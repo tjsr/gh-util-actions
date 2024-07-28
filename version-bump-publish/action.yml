@@ -93,7 +93,7 @@ runs:
   - name: Install ${{ env.PROJECT }} dependencies
     id: install
     env:
-      NODE_AUTH_TOKEN: ${{ inputs.token }}
+      NODE_AUTH_TOKEN: "${{ inputs.token }}"
     shell: bash
     run: |
       echo "Version:" 
@@ -112,14 +112,16 @@ runs:
       if [ -z "${{ inputs.no-tag }}" ]; then
         NO_TAG="--no-git-tag-version"
       else
-        $NO_TAG=""
+        NO_TAG=""
       fi
       NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG --preid dev)
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 
   - name: Publish the package
-    if: ${{ inputs.no-publish != 'true' }}
     id: publish-package
+    if: ${{ inputs.no-publish != 'true' }}
+    env:
+      NODE_AUTH_TOKEN: "${{ inputs.token }}"
     shell: bash
     run: |
       npm publish --dry-run
