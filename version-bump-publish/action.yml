@@ -105,6 +105,11 @@ runs:
       echo "CI:" 
       npm ci
 
+  - name: Set the github user config for the actions bot.
+    run: |
+      git config --global user.name "github-actions[bot]"
+      git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
   - name: Bump the patch version
     id: bump-version
     shell: bash
