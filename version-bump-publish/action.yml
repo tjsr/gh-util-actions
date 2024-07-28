@@ -65,7 +65,7 @@ runs:
     id: node-cache
     with:
       path: |
-        ~/.npmrc
+        /home/runner/work/_temp/.npmrc
         ~/node_modules
       key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
       restore-keys: |
@@ -93,7 +93,8 @@ runs:
     id: install
     shell: bash
     run: |
-      cat ~/.npmrc
+      cat $NPM_CONFIG_USERCONFIG
+      npm config get prefix
       npm ci
 
   - name: Bump the patch version

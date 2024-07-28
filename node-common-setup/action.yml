@@ -52,7 +52,7 @@ runs:
     uses: actions/cache/save@main
     with:
       path: |
-        ~/.npmrc
+        /home/runner/work/_temp/.npmrc
         ~/node_modules
       key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
       restore-keys: |
