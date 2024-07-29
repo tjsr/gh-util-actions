@@ -1,0 +1,58 @@
+name: '@tjsr/gh-util-actions/node-common-setup'
+description: Common node setup with cache for own projects
+author: Tim Rowe <tim@tjsr.id.au>
+inputs:
+  npm-version:
+    type: string
+    description: 'The npm version to install before running the action'
+    default: 'latest'
+    required: false
+  node-version:
+    type: string
+    description: 'The node version to install before running the action'
+    required: false
+    default: '20.15.1'
+  scope:
+    type: string
+    description: 'The scope to use for the .npmrc file if it needs overriding'
+    required: false
+    default: '@tjsr'
+  token:
+    type: string
+    description: 'The GitHub token to use for PR creation'
+    required: true
+  cache-key:
+    type: string
+    description: 'The key to use for the cache'
+    required: false
+    default: 'node-cache'
+
+runs:
+  # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
+  using: 'composite'
+  steps:
+
+  # Setup .npmrc file to publish to GitHub Packages
+  - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
+    uses: actions/setup-node@v4
+    with:
+      always-auth: true
+      node-version: ${{ inputs.node-version}}
+      cache: 'npm'
+      registry-url: 'https://npm.pkg.github.com'
+      scope: "${{ inputs.scope }}"
+      # token: "${{ inputs.token }}"
+
+  - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
+    if: ${{ inputs.npm-version != '' }}
+    run: npm install -g npm@${{ inputs.npm-version }}
+    shell: bash
+
+  - name: Force-save cache
+    uses: actions/cache/save@main
+    with:
+      path: |
+        /home/runner/.npm
+        /home/runner/work/_temp/.npmrc
+        ~/node_modules
+      key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}

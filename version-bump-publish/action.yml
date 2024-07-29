@@ -1,0 +1,145 @@
+name: '@tjsr/gh-util-actions/version-bump-publish'
+description: Update an npm dependency and raise a PR
+author: Tim Rowe <tim@tjsr.id.au>
+inputs:
+  token:
+    type: string
+    description: 'The GitHub token to use for PR creation'
+    required: true
+  cache-key:
+    type: string
+    description: 'The key to use for the node cache'
+    required: false
+    default: 'node-cache'
+  no-publish:
+    type: boolean
+    description: "Bump the version number, but don't publish the package"
+    required: false
+    default: false
+  no-tag:
+    type: boolean
+    description: "Bump the version number, but don't tag the commit"
+    required: false
+    default: false
+  node-version:
+    type: string
+    description: 'The node version to install before running the action'
+    required: false
+    default: '20.15.1'
+  npm-version:
+    type: string
+    description: 'The npm version to install before running the action'
+    default: 'latest'
+    required: false
+  patchlevel:
+    type: string
+    description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
+    required: false
+    default: 'prerelease'
+  scope:
+    type: string
+    description: 'The scope to use for the .npmrc file if it needs overriding'
+    required: false
+    default: '@tjsr'
+
+outputs:
+  version:
+    description: 'The new version number'
+    value: ${{ steps.bump-version.outputs.version }}
+
+runs:
+  # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
+  using: 'composite'
+  steps:
+  - name: Validate patchlevel input
+    id: validate-patchlevel
+    shell: bash
+    run: |
+      if [[ ! ${{ inputs.patchlevel }} =~ ^(prerelease|patch|minor|major)$ ]]; then
+        echo "Invalid patchlevel value provided: ${{ inputs.patchlevel }}"
+        exit 1
+      fi
+
+  # - name: Cache node config and node_modules
+  #   uses: actions/cache@main
+  #   id: node-cache
+  #   with:
+  #     path: |
+  #       /home/runner/.npm
+  #       /home/runner/work/_temp/.npmrc
+  #       ~/node_modules
+  #     key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
+  #     restore-keys: |
+  #       ${{ runner.OS }}-npm-cache-${{ github.github.run_id }}-${{ github.run_number }}
+  #       ${{ runner.OS }}-npm-cache-
+
+  # Setup .npmrc file to publish to GitHub Packages
+  - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
+    uses: actions/setup-node@v4
+    # if: ${{ steps.node-cache.outputs.cache-hit != true }}
+    with:
+      always-auth: true
+      node-version: ${{ inputs.node-version}}
+      cache: 'npm'
+      registry-url: 'https://npm.pkg.github.com'
+      scope: "${{ inputs.scope }}"
+      # token: "${{ inputs.token }}"
+
+  - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
+    # if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
+    run: npm install -g npm@${{ inputs.npm-version }}
+    shell: bash
+
+  - name: Install ${{ env.PROJECT }} dependencies
+    id: install
+    env:
+      NODE_AUTH_TOKEN: "${{ inputs.token }}"
+    shell: bash
+    run: |
+      echo "Version:" 
+      npm --version
+      echo "Config:" 
+      cat $NPM_CONFIG_USERCONFIG
+      echo "Prefix:" 
+      npm config get prefix
+      echo "CI:" 
+      npm ci
+
+  - name: Set the github user config for the actions bot.
+    shell: bash
+    run: |
+      git config --global user.name "github-actions[bot]"
+      git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+  - name: Bump the patch version
+    id: bump-version
+    shell: bash
+    run: |
+      if [ -z "${{ inputs.no-tag }}" ]; then
+        NO_TAG="--no-git-tag-version"
+      else
+        NO_TAG=""
+      fi
+      NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG --preid dev)
+      echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
+      echo "Project version number bumped to $NEW_VERSION_NUMBER"
+
+  # - name: Get the base branch this version is based on.
+  #   id: base-branch
+  #   if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
+  #   shell: bash
+  #   run: |
+  #     BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+  #     echo "PR will be based off branch $BASE_BRANCH"
+  #     echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
+
+  - name: Publish the package
+    id: publish-package
+    if: ${{ inputs.no-publish != 'true' }}
+    env:
+      NODE_AUTH_TOKEN: "${{ inputs.token }}"
+    shell: bash
+    run: |
+      npm publish
+      git push --tags
+
