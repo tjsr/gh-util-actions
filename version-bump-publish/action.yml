@@ -51,6 +51,9 @@ outputs:
   version:
     description: 'The new version number'
     value: ${{ steps.bump-version.outputs.version }}
+  published:
+    description: 'Whether the package was published'
+    value: ${{ steps.publish-package.outputs.published == "true" && 'true' || 'false' }}
 
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
@@ -137,4 +140,5 @@ runs:
     run: |
       npm publish
       git push --tags
+      echo "published=true" >> "$GITHUB_OUTPUT"
 
