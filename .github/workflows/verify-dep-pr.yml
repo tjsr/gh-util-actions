@@ -64,7 +64,7 @@ jobs:
       id: close-pr
       shell: bash
       run: |
-        gh pr close "Closing the pull request"gh pr close \
+        gh pr close \
           --comment "Test complete - closed PR." \
           --delete-branch "${{ steps.dependency-pr.outputs.branch }}"
 
