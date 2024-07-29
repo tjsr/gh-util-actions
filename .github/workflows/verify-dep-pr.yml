@@ -23,6 +23,7 @@ jobs:
         labels: |
           test
           ci
+          ci-${{ github.run_id }}
 
 #   verify-specified:
 #     name: Verify the action when we give a version number
