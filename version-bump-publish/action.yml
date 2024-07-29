@@ -38,7 +38,7 @@ inputs:
     default: 'prerelease'
   preid:
     type: string
-    description: 'The version preid portion to use in the version string, eg \'dev\'=>1.0.0-dev.0. Requires \'release\' for not value.'
+    description: 'The version preid portion to use in the version string, eg "dev"=>1.0.0-dev.0. Requires "release" for not value.'
     required: false
     default: 'dev'
   scope:
