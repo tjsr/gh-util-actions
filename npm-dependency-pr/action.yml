@@ -215,7 +215,7 @@ runs:
       reviewers: ${{ inputs.reviewers || '' }}
 
   - name: Add labels to the newly created PR
-    if: create-pr.outputs.pull-request-number
+    if: ${{ steps.create-pr.outputs.pull-request-number != '' }}
     uses: action-ecosystem/action-add-labels@v1
     with:
       number: ${{ steps.create-pr.outputs.pull-request-number }}
