@@ -29,8 +29,11 @@ jobs:
     - name: Close the pull request
       id: close-pr
       shell: bash
-      run: echo "Closing the pull request"gh pr close --comment "Test complete - closed PR." --delete-branch "${{ steps.dependency-pr.outputs.branch }}"
-    
+      run: |
+        gh pr close "Closing the pull request"gh pr close \
+          --comment "Test complete - closed PR." \
+          --delete-branch "${{ steps.dependency-pr.outputs.branch }}"
+
   verify-specified:
     permissions:
       contents: write
@@ -60,7 +63,10 @@ jobs:
     - name: Close the pull request
       id: close-pr
       shell: bash
-      run: echo "Closing the pull request"gh pr close --comment "Test complete - closed PR." --delete-branch "${{ steps.dependency-pr.outputs.branch }}"
+      run: |
+        gh pr close "Closing the pull request"gh pr close \
+          --comment "Test complete - closed PR." \
+          --delete-branch "${{ steps.dependency-pr.outputs.branch }}"
 
 #   verify-branch-exists:
 #     name: Verify the action when we give a version number
