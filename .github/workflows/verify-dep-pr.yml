@@ -22,15 +22,34 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         labels: |
           test
+          test-verify-outdated
           ci
           ci-${{ github.run_id }}
 
-#   verify-specified:
-#     name: Verify the action when we give a version number
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: Check out repository code
-#       uses: actions/checkout@v4
+  verify-specified:
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+    name: Verify the action with no version number
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+  
+    - uses: ./npm-dependency-pr
+      with:
+        dependency: 'rimraf'
+        version: '5.0.9'
+        projectPath: './npm-dependency-pr/tests'
+        nodeVersion: '20.15.1'
+        failOnNoNewVersion: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        labels: |
+          test
+          test-verify-specified
+          ci
+          ci-${{ github.run_id }}
 
 #   verify-branch-exists:
 #     name: Verify the action when we give a version number
