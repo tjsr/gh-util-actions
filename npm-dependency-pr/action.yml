@@ -220,4 +220,4 @@ runs:
     with:
       number: ${{ steps.create-pr.outputs.pull-request-number }}
       labels: ${{ inputs.labels || '' }}
-      token: ${{ inputs.token }}
+      github_token: ${{ inputs.token }}
