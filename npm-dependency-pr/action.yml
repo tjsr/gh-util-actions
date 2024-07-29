@@ -53,19 +53,19 @@ inputs:
 outputs:
   hasNewVersion:
     description: 'Whether or not there is a new version'
-    value: ${{ steps.action-npm-outdated.outputs.hasNewVersion }}
+    value: ${{ steps.get-version.outputs.hasNewVersion }}
   branchName:
     description: 'The name of the branch created'
-    value: ${{ steps.action-npm-outdated.outputs.branchName }}
+    value: ${{ steps.create-pr.outputs.pull-request-branch }}
   pullRequestNumber:
     description: 'The number of the pull request created'
-    value: ${{ steps.action-npm-outdated.outputs.pull-request-number }}
+    value: ${{ steps.create-pr.outputs.pull-request-number }}
   pullRequestUrl:
     description: 'The URL of the pull request created'
-    value: ${{ steps.action-npm-outdated.outputs.pull-request-url }}
+    value: ${{ steps.create-pr.outputs.pull-request-url }}
   pullRequestOperation:
     description: 'The operation performed on the pull request'
-    value: ${{ steps.action-npm-outdated.outputs.pull-request-operation }}
+    value: ${{ steps.create-pr.outputs.pull-request-operation }}
 
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
