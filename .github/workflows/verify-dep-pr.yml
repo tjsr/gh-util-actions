@@ -1,4 +1,4 @@
-name: Verify the composite check-upgrade-pr action works
+name: Verify the composite npm-dependency-pr action works
 on: push
 
 jobs:
@@ -20,6 +20,7 @@ jobs:
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
+        labels: 'test, ci'
 
 #   verify-specified:
 #     name: Verify the action when we give a version number
