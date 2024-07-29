@@ -40,7 +40,7 @@ jobs:
     - uses: ./npm-dependency-pr
       with:
         dependency: 'rimraf'
-        version: '5.0.9'
+        packageVersion: '5.0.9'
         projectPath: './npm-dependency-pr/tests'
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
