@@ -34,7 +34,7 @@ jobs:
       run: |
         gh pr close \
           --comment "Test complete - closed PR." \
-          --delete-branch "${{ steps.dependency-pr.outputs.branch }}"
+          --delete-branch "${{ steps.dependency-pr.outputs.pullRequestNumber }}"
 
   verify-specified:
     permissions:
@@ -70,7 +70,7 @@ jobs:
       run: |
         gh pr close \
           --comment "Test complete - closed PR." \
-          --delete-branch "${{ steps.dependency-pr.outputs.branch }}"
+          --delete-branch "${{ steps.dependency-pr.outputs.pullRequestNumber }}"
 
 #   verify-branch-exists:
 #     name: Verify the action when we give a version number
