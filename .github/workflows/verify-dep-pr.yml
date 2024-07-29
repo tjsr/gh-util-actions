@@ -20,7 +20,9 @@ jobs:
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        labels: 'test, ci'
+        labels: |
+          test
+          ci
 
 #   verify-specified:
 #     name: Verify the action when we give a version number

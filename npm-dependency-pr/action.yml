@@ -47,7 +47,7 @@ inputs:
     required: false
   labels:
     type: string
-    description: 'Comma-separated list of labels to add to the PR'
+    description: 'List of labels to add to the PR.  One per line.'
     required: false
 
 outputs:
