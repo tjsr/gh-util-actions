@@ -1,4 +1,4 @@
-name: Verify the composite check-upgrade-pr action works
+name: Verify the composite npm-dependency-pr action works
 on: push
 
 jobs:
@@ -14,19 +14,63 @@ jobs:
       uses: actions/checkout@v4
   
     - uses: ./npm-dependency-pr
+      id: dependency-pr
       with:
         dependency: 'rimraf'
         projectPath: './npm-dependency-pr/tests'
         nodeVersion: '20.15.1'
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
+        labels: |
+          test
+          test-verify-outdated
+          ci
+          ci-${{ github.run_id }}
+    - name: Close the pull request
+      id: close-pr
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh pr close \
+          --comment "Test complete - closed PR." \
+          --delete-branch "${{ steps.dependency-pr.outputs.pullRequestNumber }}"
 
-#   verify-specified:
-#     name: Verify the action when we give a version number
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: Check out repository code
-#       uses: actions/checkout@v4
+  verify-specified:
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+    name: Verify the action with no version number
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+  
+    - uses: ./npm-dependency-pr
+      id: dependency-pr
+      with:
+        dependency: 'rimraf'
+        packageVersion: '5.0.9'
+        projectPath: './npm-dependency-pr/tests'
+        nodeVersion: '20.15.1'
+        failOnNoNewVersion: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        labels: |
+          test
+          test-verify-specified
+          ci
+          ci-${{ github.run_id }}
+
+    - name: Close the pull request
+      id: close-pr
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh pr close \
+          --comment "Test complete - closed PR." \
+          --delete-branch "${{ steps.dependency-pr.outputs.pullRequestNumber }}"
 
 #   verify-branch-exists:
 #     name: Verify the action when we give a version number

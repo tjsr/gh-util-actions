@@ -36,6 +36,11 @@ inputs:
     description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
     required: false
     default: 'prerelease'
+  preid:
+    type: string
+    description: 'The version preid portion to use in the version string, eg "dev"=>1.0.0-dev.0. Requires "release" for not value.'
+    required: false
+    default: 'dev'
   scope:
     type: string
     description: 'The scope to use for the .npmrc file if it needs overriding'
@@ -46,6 +51,9 @@ outputs:
   version:
     description: 'The new version number'
     value: ${{ steps.bump-version.outputs.version }}
+  published:
+    description: 'Whether the package was published'
+    value: ${{ steps.publish-package.outputs.published == "true" && 'true' || 'false' }}
 
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
@@ -95,15 +103,7 @@ runs:
     env:
       NODE_AUTH_TOKEN: "${{ inputs.token }}"
     shell: bash
-    run: |
-      echo "Version:" 
-      npm --version
-      echo "Config:" 
-      cat $NPM_CONFIG_USERCONFIG
-      echo "Prefix:" 
-      npm config get prefix
-      echo "CI:" 
-      npm ci
+    run: npm ci
 
   - name: Set the github user config for the actions bot.
     shell: bash
@@ -114,13 +114,11 @@ runs:
   - name: Bump the patch version
     id: bump-version
     shell: bash
+    env:
+      NO_TAG: ${{ inputs.no-tag == 'true' && '' || '--no-git-tag-version' }}
+      PREID: ${{ inputs.preid == 'release' && '' || format('--preid {0}', inputs.preid) }}
     run: |
-      if [ -z "${{ inputs.no-tag }}" ]; then
-        NO_TAG="--no-git-tag-version"
-      else
-        NO_TAG=""
-      fi
-      NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG --preid dev)
+      NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG $PREID)
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
       echo "Project version number bumped to $NEW_VERSION_NUMBER"
 
@@ -142,4 +140,5 @@ runs:
     run: |
       npm publish
       git push --tags
+      echo "published=true" >> "$GITHUB_OUTPUT"
 
