@@ -47,7 +47,7 @@ inputs:
     required: false
   labels:
     type: string
-    description: 'List of labels to add to the PR.  One per line.'
+    description: 'Comma-separated or one-per-line list of labels to add to the PR.  One per line.'
     required: false
 
 outputs:
@@ -216,8 +216,17 @@ runs:
 
   - name: Add labels to the newly created PR
     if: ${{ steps.create-pr.outputs.pull-request-number != '' }}
-    uses: actions-ecosystem/action-add-labels@v1
+
+    uses: ../label-pr
+    if: ${{ inputs.labels !== '' }}
     with:
-      number: ${{ steps.create-pr.outputs.pull-request-number }}
-      labels: ${{ inputs.labels || '' }}
-      github_token: ${{ inputs.token }}
+      script: |
+        let inputLabels = "${{ inputs.labels}}"
+        let labels = 
+        github.rest.issues.addLabels({
+          issue_number: steps.create-pr.outputs.pull-request-number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          labels: ['label']
+        })
+
