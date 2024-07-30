@@ -27,7 +27,7 @@ runs:
     if: ${{ inputs.labels != '' }}
     with:
       script: |
-        let inputLabels = "${{ inputs.labels }}";
+        let inputLabels = `${{ inputs.labels }}`;
         
         let labels = inputLabels.split(/,|\n/).map(label => label.trim()).filter(label => label);
 
