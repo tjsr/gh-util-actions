@@ -41,7 +41,7 @@ jobs:
       contents: write
       pull-requests: write
       packages: read
-    name: Verify the action with no version number
+    name: Verify the action with a specified version
     runs-on: ubuntu-latest
     steps:
     - name: Check out repository code
