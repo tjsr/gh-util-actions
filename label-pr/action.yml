@@ -1,0 +1,43 @@
+name: '@tjsr/gh-util-actions/label-pr'
+description: Update an npm dependency and raise a PR
+author: Tim Rowe <tim@tjsr.id.au>
+inputs:
+  labels:
+    type: string
+    description: 'Comma-separated or newline-separated list of labels to add to the PR'
+    required: true
+  pr:
+    type: string
+    description: 'The pull request number to add the labels to'
+    required: true
+  owner:
+    type: string
+    description: 'The owner of the repository.  Uses context.owner if not provided.'
+    required: false
+  repo:
+    type: string
+    description: 'The repository name. Uses context.repo if not provided.'
+    required: false
+runs:
+  using: 'composite'
+
+  steps:
+  - name: Label PR ${{ inputs.pr }} using the provided labels
+    uses: actions/github-script@v7
+    if: ${{ inputs.labels != '' }}
+    with:
+      script: |
+        let inputLabels = `${{ inputs.labels }}`;
+        
+        let labels = inputLabels.split(/,|\n/).map(label => label.trim()).filter(label => label);
+        let owner = '${{ inputs.owner }}';
+        owner = owner ? owner : context.repo.owner;
+        let repo = '${{ inputs.repo }}';
+        repo = repo ? repo : context.repo.repo;
+
+        github.rest.issues.addLabels({
+          issue_number: '${{ inputs.pr }}',
+          owner: owner,
+          repo: repo,
+          labels: labels
+        });
