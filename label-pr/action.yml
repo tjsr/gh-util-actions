@@ -22,8 +22,8 @@ runs:
   using: 'composite'
 
   steps:
-    name: Label PR ${{ input.pr }} using the provided labels
-  - uses: actions/github-script@v6
+  - name: Label PR ${{ input.pr }} using the provided labels
+    uses: actions/github-script@v6
     if: ${{ inputs.labels !== '' }}
     with:
       script: |
