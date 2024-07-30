@@ -216,7 +216,7 @@ runs:
 
   - name: Add labels to the newly created PR
     if: ${{ steps.create-pr.outputs.pull-request-number != '' && inputs.labels != '' }}
-    uses: tjsr/gh-util-actions/label-pr@${{ github.ref_name }}
+    uses: tjsr/gh-util-actions/label-pr@develop/label-pr-action
     with:
       labels: ${{ inputs.labels }}
       pr: ${{ steps.create-pr.outputs.pull-request-number }}
