@@ -33,7 +33,7 @@ runs:
 
         github.rest.issues.addLabels({
           issue_number: '${{ inputs.pr }}',
-          owner: '${{ inputs.owner }}' ?? context.repo.owner,
-          repo: '${{ inputs.repo }}' ?? context.repo.repo,
+          owner: '${{ inputs.owner }}' ? '' : context.repo.owner,
+          repo: '${{ inputs.repo }}' ? '' : context.repo.repo,
           labels: labels
         });
