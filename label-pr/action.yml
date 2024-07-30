@@ -22,9 +22,9 @@ runs:
   using: 'composite'
 
   steps:
-  - name: Label PR ${{ input.pr }} using the provided labels
+  - name: Label PR ${{ inputs.pr }} using the provided labels
     uses: actions/github-script@v6
-    if: ${{ inputs.labels !== '' }}
+    if: ${{ inputs.labels != '' }}
     with:
       script: |
         let inputLabels = "${{ inputs.labels }}";
