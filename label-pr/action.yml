@@ -32,7 +32,7 @@ runs:
         let labels = inputLabels.split(/,|\n/).map(label => label.trim()).filter(label => label);
 
         github.rest.issues.addLabels({
-          issue_number: '${{ inputs.pr }},
+          issue_number: '${{ inputs.pr }}',
           owner: '${{ inputs.owner }}' ?? context.repo.owner,
           repo: '${{ inputs.repo }}' ?? context.repo.repo,
           labels: labels
