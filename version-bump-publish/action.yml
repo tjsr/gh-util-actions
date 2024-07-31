@@ -53,7 +53,7 @@ outputs:
     value: ${{ steps.bump-version.outputs.version }}
   published:
     description: 'Whether the package was published'
-    value: ${{ steps.publish-package.outputs.published == "true" && 'true' || 'false' }}
+    value: ${{ steps.publish-package.outputs.published == 'true' && 'true' || 'false' }}
 
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
@@ -121,7 +121,7 @@ runs:
 
   - name: Get the latest published version number
     id: get-latest-version
-    uses: package-latest-version
+    uses: Bruce17/ghaction-package-latest-version@v1.1.2
     with:
       package: ${{ env.PROJECT }}
       language: node
