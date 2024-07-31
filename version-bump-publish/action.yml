@@ -123,13 +123,14 @@ runs:
 
   - name: Get the latest published version number
     id: get-latest-version
-    uses: Bruce17/ghaction-package-latest-version@v1.1.2
+    shell: bash
     env:
-      NODE_AUTH_TOKEN: "${{ inputs.token }}"
-    with:
-      package: ${{ steps.current-package.outputs.name }}
-      language: node
-      registry: 'https://npm.pkg.github.com'
+      PACKAGE_NAME: ${{ steps.current-package.outputs.name }}
+      CURRENT_VERSION_NUMBER: ${{ steps.current-package.outputs.version }}
+    run: |
+      MATCHING_BRANCH_VERSION=$(npx semver -r $CURRENT_VERSION_NUMBER $(npm view "$PACKAGE_NAME" versions --json |jq -r '.[]'))
+      echo "Got latest version for $PACKAGE_NAME: $MATCHING_BRANCH_VERSION"
+      echo "branchLatest=$MATCHING_BRANCH_VERSION" >> "$GITHUB_OUTPUT
 
   - name: Set the version to the latest published version then bump the patch version
     id: bump-version
@@ -137,12 +138,16 @@ runs:
     env:
       NO_TAG: ${{ inputs.no-tag == 'true' && '' || '--no-git-tag-version' }}
       PREID: ${{ inputs.preid == 'release' && '' || format('--preid {0}', inputs.preid) }}
-      LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
+      LATEST_VERSION: ${{ steps.get-latest-version.outputs.branchLatest }}
+      PACKAGE_NAME: ${{ steps.current-package.outputs.name }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
-      npm version $LATEST_VERSION
-      NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG $PREID)
+      NEW_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID $LATEST_VERSION)
+      
+      npm version $NEW_VERSION_NUMBER $NO_TAG
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
-      echo "Project version number bumped to $NEW_VERSION_NUMBER"
+      echo "fullVersion=\"$PACKAGE_NAME@$NEW_VERSION_NUMBER\"" >> "$GITHUB_OUTPUT"
+      echo "Project version number bumped to $PACKAGE_NAME@$NEW_VERSION_NUMBER"
 
   # - name: Get the base branch this version is based on.
   #   id: base-branch
@@ -158,9 +163,14 @@ runs:
     if: ${{ inputs.no-publish != 'true' }}
     env:
       NODE_AUTH_TOKEN: "${{ inputs.token }}"
+      PACKAGE_WITH_VERSION: "${{ steps.bump-version.outputs.fullVersion }}"
+      PREID: ${{ inputs.preid }}
     shell: bash
     run: |
       npm publish
+      if [ ! -z "$PREID"]; then
+        npm dist-tag add $PACKAGE_WITH_VERSION $PREID
+      fi
       git push --tags
       echo "published=true" >> "$GITHUB_OUTPUT"
 
