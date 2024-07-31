@@ -111,13 +111,15 @@ runs:
       git config --global user.name "github-actions[bot]"
       git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-  - name: Get the current version from package.json
+  - name: Get the current name and version from package.json
     shell: bash
-    id: current-version
+    id: current-package
     run: |
       CURRENT_VERSION_NUMBER=$(cat package.json | jq -r '.version')
-      echo "Current project version number is $CURRENT_VERSION_NUMBER"
+      PACKAGE_NAME=$(cat package.json | jq -r '.name')
+      echo "Current package $PACKAGE_NAME version number is $CURRENT_VERSION_NUMBER"
       echo "version=$CURRENT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
+      echo "name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
 
   - name: Get the latest published version number
     id: get-latest-version
@@ -126,22 +128,17 @@ runs:
       package: ${{ env.PROJECT }}
       language: node
       registry: 'https://npm.pkg.github.com'
+      package: ${{ steps.current-package.outputs.name }}
 
-  - name: Set the version to the latest published version
-    id: set-latest-version
-    shell: bash
-    env:
-      LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
-    run: |
-      npm version $LATEST_VERSION
-
-  - name: Bump the patch version
+  - name: Set the version to the latest published version then bump the patch version
     id: bump-version
     shell: bash
     env:
       NO_TAG: ${{ inputs.no-tag == 'true' && '' || '--no-git-tag-version' }}
       PREID: ${{ inputs.preid == 'release' && '' || format('--preid {0}', inputs.preid) }}
+      LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
     run: |
+      npm version $LATEST_VERSION
       NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG $PREID)
       echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
       echo "Project version number bumped to $NEW_VERSION_NUMBER"
