@@ -124,6 +124,8 @@ runs:
   - name: Get the latest published version number
     id: get-latest-version
     uses: Bruce17/ghaction-package-latest-version@v1.1.2
+    env:
+      NODE_AUTH_TOKEN: "${{ inputs.token }}"
     with:
       package: ${{ steps.current-package.outputs.name }}
       language: node
