@@ -98,7 +98,17 @@ runs:
     run: npm install -g npm@${{ inputs.npm-version }}
     shell: bash
 
-  - name: Install ${{ env.PROJECT }} dependencies
+  - name: Get the current name and version from package.json
+    shell: bash
+    id: current-package
+    run: |
+      CURRENT_VERSION_NUMBER=$(cat package.json | jq -r '.version')
+      PACKAGE_NAME=$(cat package.json | jq -r '.name')
+      echo "Current package $PACKAGE_NAME version number is $CURRENT_VERSION_NUMBER"
+      echo "version=$CURRENT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
+      echo "name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+
+  - name: Install ${{ steps.current-package.outputs.name }} dependencies
     id: install
     env:
       NODE_AUTH_TOKEN: "${{ inputs.token }}"
@@ -110,16 +120,6 @@ runs:
     run: |
       git config --global user.name "github-actions[bot]"
       git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-  - name: Get the current name and version from package.json
-    shell: bash
-    id: current-package
-    run: |
-      CURRENT_VERSION_NUMBER=$(cat package.json | jq -r '.version')
-      PACKAGE_NAME=$(cat package.json | jq -r '.name')
-      echo "Current package $PACKAGE_NAME version number is $CURRENT_VERSION_NUMBER"
-      echo "version=$CURRENT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
-      echo "name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
 
   - name: Get the latest published version number
     id: get-latest-version
