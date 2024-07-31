@@ -125,10 +125,9 @@ runs:
     id: get-latest-version
     uses: Bruce17/ghaction-package-latest-version@v1.1.2
     with:
-      package: ${{ env.PROJECT }}
+      package: ${{ steps.current-package.outputs.name }}
       language: node
       registry: 'https://npm.pkg.github.com'
-      package: ${{ steps.current-package.outputs.name }}
 
   - name: Set the version to the latest published version then bump the patch version
     id: bump-version
