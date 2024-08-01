@@ -15,9 +15,10 @@ PACKAGE_NAME=$(cat package.json | jq -r '.name')
 if [ "$PREID" = "release" ]; then
   PREID_SWITCH=""
 elif [ ! -z "$PREID" ]; then
-  echo "Using prerelease identifier: $PREID"
+  echo "Using prerelease identifier: $PREID, --preid $PREID"
   PREID_SWITCH="--preid $PREID"
 else
+  echo "Using default preid, --preid dev"
   PREID_SWITCH="--preid dev"
 fi
 
