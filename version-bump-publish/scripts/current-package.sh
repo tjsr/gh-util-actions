@@ -17,6 +17,8 @@ if [ "$PREID" = "release" ]; then
 elif [ ! -z "$PREID" ]; then
   echo "Using prerelease identifier: $PREID"
   PREID_SWITCH="--preid $PREID"
+else
+  PREID_SWITCH="--preid dev"
 fi
 
 PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json |jq -r '.[]' | tr '\n' ' ' | awk '{$1=$1; print}')

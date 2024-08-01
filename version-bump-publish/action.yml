@@ -106,6 +106,8 @@ runs:
   - name: Get the latest published version number
     id: get-latest-version
     shell: bash
+    env:
+      PREID: ${{ inputs.preid }}
     run: $SCRIPT_DIR/current-package.sh
 
   - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
@@ -151,6 +153,7 @@ runs:
     shell: bash
     run: |
       echo "Publishing package $PACKAGE_WITH_VERSION"
+      echo "preid=$PREID"
       npm publish
       if [ ! -z "$PREID" ]; then
         npm dist-tag add $PACKAGE_WITH_VERSION $PREID

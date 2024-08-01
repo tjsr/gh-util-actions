@@ -27,9 +27,11 @@ if [ -z "$NEXT_VERSION_NUMBER" ]; then
   fi
   if [ "$PREID" = "release" ]; then
     PREID_SWITCH=""
-  else
+  elif [ ! -z "$PREID" ]; then
     echo "Using prerelease identifier: $PREID"
     PREID_SWITCH="--preid $PREID"
+  else
+    PREID_SWITCH="--preid dev"
   fi
 
   NEXT_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID_SWITCH $BRANCH_VERSION)
