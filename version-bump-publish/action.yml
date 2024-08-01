@@ -68,6 +68,13 @@ runs:
         exit 1
       fi
 
+  using: 'composite'
+  steps:
+  - name: Set script path
+    shell: bash
+    run: |
+      echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
+
   # - name: Cache node config and node_modules
   #   uses: actions/cache@main
   #   id: node-cache
@@ -98,17 +105,12 @@ runs:
     run: npm install -g npm@${{ inputs.npm-version }}
     shell: bash
 
-  - name: Get the current name and version from package.json
+  - name: Get the latest published version number
+    id: get-latest-version
     shell: bash
-    id: current-package
-    run: |
-      CURRENT_VERSION_NUMBER=$(cat package.json | jq -r '.version')
-      PACKAGE_NAME=$(cat package.json | jq -r '.name')
-      echo "Current package $PACKAGE_NAME version number is $CURRENT_VERSION_NUMBER"
-      echo "version=$CURRENT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
-      echo "name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+    run: $SCRIPT_DIR/current-package.sh
 
-  - name: Install ${{ steps.current-package.outputs.name }} dependencies
+  - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
     id: install
     env:
       NODE_AUTH_TOKEN: "${{ inputs.token }}"
@@ -121,33 +123,16 @@ runs:
       git config --global user.name "github-actions[bot]"
       git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-  - name: Get the latest published version number
-    id: get-latest-version
-    shell: bash
-    env:
-      PACKAGE_NAME: ${{ steps.current-package.outputs.name }}
-      CURRENT_VERSION_NUMBER: ${{ steps.current-package.outputs.version }}
-    run: |
-      MATCHING_BRANCH_VERSION=$(npx semver -r $CURRENT_VERSION_NUMBER $(npm view "$PACKAGE_NAME" versions --json |jq -r '.[]'))
-      echo "Got latest version for $PACKAGE_NAME: $MATCHING_BRANCH_VERSION"
-      echo "branchLatest=$MATCHING_BRANCH_VERSION" >> "$GITHUB_OUTPUT
-
   - name: Set the version to the latest published version then bump the patch version
     id: bump-version
     shell: bash
     env:
-      NO_TAG: ${{ inputs.no-tag == 'true' && '' || '--no-git-tag-version' }}
-      PREID: ${{ inputs.preid == 'release' && '' || format('--preid {0}', inputs.preid) }}
-      LATEST_VERSION: ${{ steps.get-latest-version.outputs.branchLatest }}
-      PACKAGE_NAME: ${{ steps.current-package.outputs.name }}
+      NO_TAG: ${{ inputs.no-tag }}
+      PREID: ${{ inputs.preid }}
+      NEXT_VERSION_NUMBER: ${{ steps.get-latest-version.outputs.nextVersion }}
+      PACKAGE_NAME: ${{ steps.get-latest-version.outputs.name }}
       PATCHLEVEL: ${{ inputs.patchlevel }}
-    run: |
-      NEW_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID $LATEST_VERSION)
-      
-      npm version $NEW_VERSION_NUMBER $NO_TAG
-      echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
-      echo "fullVersion=\"$PACKAGE_NAME@$NEW_VERSION_NUMBER\"" >> "$GITHUB_OUTPUT"
-      echo "Project version number bumped to $PACKAGE_NAME@$NEW_VERSION_NUMBER"
+    run: $SCRIPT_DIR/bump-version.sh
 
   # - name: Get the base branch this version is based on.
   #   id: base-branch
