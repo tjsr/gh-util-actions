@@ -68,8 +68,6 @@ runs:
         exit 1
       fi
 
-  using: 'composite'
-  steps:
   - name: Set script path
     shell: bash
     run: |
