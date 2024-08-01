@@ -14,11 +14,6 @@ if [ -z "$PACKAGE_NAME" ]; then
   exit 1
 fi
 
-if [ -z "$LATEST_VERSION" ]; then
-  echo "LATEST_VERSION is not set. Please set the LATEST_VERSION environment variable of get-latest-version step output." 
-  exit 1
-fi
-
 if [ "$NO_TAG" = "true" ] || [ "$NO_TAG" = "--no-git-tag-version" ]; then
   NO_TAG="--no-git-tag-version"
 else
