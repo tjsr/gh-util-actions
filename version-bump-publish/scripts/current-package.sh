@@ -12,6 +12,11 @@ fi
 PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
 PACKAGE_NAME=$(cat package.json | jq -r '.name')
 
+if [ -z "$PATCHLEVEL" ]; then
+  echo "PATCHLEVEL is not set. Please set the PATCHLEVEL environment variable or patchlevel action input."
+  exit 1
+fi
+
 if [ "$PREID" = "release" ]; then
   PREID_SWITCH=""
 elif [ ! -z "$PREID" ]; then

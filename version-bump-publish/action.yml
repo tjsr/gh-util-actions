@@ -108,6 +108,7 @@ runs:
     shell: bash
     env:
       PREID: ${{ inputs.preid }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
     run: $SCRIPT_DIR/current-package.sh
 
   - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
