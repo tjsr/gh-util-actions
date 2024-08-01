@@ -145,8 +145,8 @@ runs:
     id: publish-package
     if: ${{ inputs.no-publish != 'true' }}
     env:
-      NODE_AUTH_TOKEN: "${{ inputs.token }}"
-      PACKAGE_WITH_VERSION: "${{ steps.bump-version.outputs.fullVersion }}"
+      NODE_AUTH_TOKEN: ${{ inputs.token }}
+      PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PREID: ${{ inputs.preid }}
     shell: bash
     run: |
