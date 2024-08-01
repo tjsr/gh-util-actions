@@ -53,7 +53,7 @@ outputs:
     value: ${{ steps.bump-version.outputs.version }}
   published:
     description: 'Whether the package was published'
-    value: ${{ steps.publish-package.outputs.published == "true" && 'true' || 'false' }}
+    value: ${{ steps.publish-package.outputs.published == 'true' && 'true' || 'false' }}
 
 runs:
   # run-name: Update ${{ inputs.dependency }} npm dependency and raise a PR
@@ -67,6 +67,11 @@ runs:
         echo "Invalid patchlevel value provided: ${{ inputs.patchlevel }}"
         exit 1
       fi
+
+  - name: Set script path
+    shell: bash
+    run: |
+      echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
 
   # - name: Cache node config and node_modules
   #   uses: actions/cache@main
@@ -98,7 +103,15 @@ runs:
     run: npm install -g npm@${{ inputs.npm-version }}
     shell: bash
 
-  - name: Install ${{ env.PROJECT }} dependencies
+  - name: Get the latest published version number
+    id: get-latest-version
+    shell: bash
+    env:
+      PREID: ${{ inputs.preid }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: $SCRIPT_DIR/current-package.sh
+
+  - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
     id: install
     env:
       NODE_AUTH_TOKEN: "${{ inputs.token }}"
@@ -111,16 +124,16 @@ runs:
       git config --global user.name "github-actions[bot]"
       git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-  - name: Bump the patch version
+  - name: Set the version to the latest published version then bump the patch version
     id: bump-version
     shell: bash
     env:
-      NO_TAG: ${{ inputs.no-tag == 'true' && '' || '--no-git-tag-version' }}
-      PREID: ${{ inputs.preid == 'release' && '' || format('--preid {0}', inputs.preid) }}
-    run: |
-      NEW_VERSION_NUMBER=$(npm version ${{ inputs.patchlevel }} $NO_TAG $PREID)
-      echo "version=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
-      echo "Project version number bumped to $NEW_VERSION_NUMBER"
+      NO_TAG: ${{ inputs.no-tag }}
+      PREID: ${{ inputs.preid }}
+      NEXT_VERSION_NUMBER: ${{ steps.get-latest-version.outputs.nextVersion }}
+      PACKAGE_NAME: ${{ steps.get-latest-version.outputs.name }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: $SCRIPT_DIR/bump-version.sh
 
   # - name: Get the base branch this version is based on.
   #   id: base-branch
@@ -135,10 +148,17 @@ runs:
     id: publish-package
     if: ${{ inputs.no-publish != 'true' }}
     env:
-      NODE_AUTH_TOKEN: "${{ inputs.token }}"
+      NODE_AUTH_TOKEN: ${{ inputs.token }}
+      PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
+      PREID: ${{ inputs.preid }}
     shell: bash
     run: |
+      echo "Publishing package $PACKAGE_WITH_VERSION"
+      echo "preid=$PREID"
       npm publish
+      if [ ! -z "$PREID" ]; then
+        npm dist-tag add $PACKAGE_WITH_VERSION $PREID
+      fi
       git push --tags
       echo "published=true" >> "$GITHUB_OUTPUT"
 
