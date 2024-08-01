@@ -23,7 +23,7 @@ PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json |jq -r '.[]' | tr 
 # echo "Versions published for this package: $PUBLISHED_VERSIONS"
 MATCHING_BRANCH_VERSION=$(npx semver -p $PREID_SWITCH -r ">= $PACKAGE_VERSION_NUMBER" $PUBLISHED_VERSIONS |tail -1)
 NEXT_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID_SWITCH $MATCHING_BRANCH_VERSION)
-echo "Got latest version for $PACKAGE_NAME: $PACKAGE_VERSION_NUMBER $MATCHING_BRANCH_VERSION"
+echo "Got latest version for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER => $MATCHING_BRANCH_VERSION"
 
 echo "Current package $PACKAGE_NAME version number is $PACKAGE_VERSION_NUMBER"
 echo "Next version matching $MATCHING_BRANCH_VERSION should be $NEXT_VERSION_NUMBER"
