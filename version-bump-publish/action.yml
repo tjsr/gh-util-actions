@@ -151,7 +151,7 @@ runs:
     shell: bash
     run: |
       npm publish
-      if [ ! -z "$PREID"]; then
+      if [ ! -z "$PREID" ]; then
         npm dist-tag add $PACKAGE_WITH_VERSION $PREID
       fi
       git push --tags
