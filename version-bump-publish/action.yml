@@ -168,12 +168,18 @@ runs:
       git push
 
       if [ "$NO_TAG" <> "true" ]; then
-        echo "Deleting existing tag $VERSION_TAG if it exists."
+        if git tag | grep -q "^$VERSION_TAG$"; then
+          echo "Tag $VERSION_TAG exists, deleting first..."
+          echo "Deleting existing tag $VERSION_TAG if it exists."
+          git tag -d "$VERSION_TAG"
+        fi
         echo "Tagging $VERSION_TAG"
-        git tag -d "$VERSION_TAG"
         git tag -fa "$VERSION_TAG" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
+
         echo "Pushing git tags."
         git push --tags -f
+      else
+        echo "Tag $VERSION_TAG does not exist"
       fi
 
       echo "Running npm publish"
