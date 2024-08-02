@@ -35,7 +35,7 @@ fi
 # echo "Versions published for this package: $PUBLISHED_VERSIONS"
 MATCHING_BRANCH_VERSION=$(npx semver -p $PREID_SWITCH -r ">= $PACKAGE_VERSION_NUMBER" $PUBLISHED_VERSIONS |tail -1)
 if [ -z "$MATCHING_BRANCH_VERSION" ]; then
-  echo "No matching branch version found for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER"
+  echo "No matching version found for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER"
   echo PUBLISHED_VERSIONS from npm view was: $PUBLISHED_VERSIONS
   exit 1
 fi
