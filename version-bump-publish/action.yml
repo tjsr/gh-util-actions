@@ -152,18 +152,26 @@ runs:
     if: ${{ inputs.no-publish != 'true' }}
     env:
       NODE_AUTH_TOKEN: ${{ inputs.token }}
+      VERSION: ${{ steps.bump-version.outputs.version }}
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PREID: ${{ inputs.preid }}
+
     shell: bash
     run: |
       echo "Publishing package $PACKAGE_WITH_VERSION"
       echo "preid=$PREID"
       # git add package.json package-lock.json
       # git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
-      git status
+      git status      
       git pull --rebase
+      echo "Pushing to $WORKING_BRANCH without tags..."
       git push
+      echo "Tagging $VERSION"
+      git tag -fa "$VERSION"
+      echo "Pushing git tags."
       git push --tags
+
+      echo "Running npm publish"
       npm publish
       if [ ! -z "$PREID" ]; then
         npm dist-tag add $PACKAGE_WITH_VERSION $PREID
