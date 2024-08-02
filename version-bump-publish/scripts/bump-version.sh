@@ -14,12 +14,6 @@ if [ -z "$PACKAGE_NAME" ]; then
   exit 1
 fi
 
-if [ "$NO_TAG" = "true" ] || [ "$NO_TAG" = "--no-git-tag-version" ]; then
-  NO_TAG="--no-git-tag-version"
-else
-  NO_TAG=""
-fi
-
 if [ -z "$NEXT_VERSION_NUMBER" ]; then
   if [ -z "$BRANCH_VERSION" ]; then
     echo "BRANCH_VERSION is not set. Please set the BRANCH_VERSION or NEXT_VERSION_NUMBER."
@@ -37,7 +31,7 @@ if [ -z "$NEXT_VERSION_NUMBER" ]; then
   NEXT_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID_SWITCH $BRANCH_VERSION)
 fi
 
-npm version $NEXT_VERSION_NUMBER $NO_TAG
+npm version $NEXT_VERSION_NUMBER --no-git-tag-version
 echo "version=$NEXT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 echo "fullVersion=$PACKAGE_NAME@$NEXT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 echo "Project version number bumped to $PACKAGE_NAME@$NEXT_VERSION_NUMBER"

@@ -131,7 +131,6 @@ runs:
     id: bump-version
     shell: bash
     env:
-      NO_TAG: ${{ inputs.no-tag }}
       PREID: ${{ inputs.preid }}
       NEXT_VERSION_NUMBER: ${{ steps.get-latest-version.outputs.nextVersion }}
       PACKAGE_NAME: ${{ steps.get-latest-version.outputs.name }}
@@ -156,7 +155,7 @@ runs:
       VERSION_TAG: 'v${{ steps.bump-version.outputs.version }}'
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PREID: ${{ inputs.preid }}
-
+      NO_TAG: ${{ inputs.no-tag == 'true' }}
     shell: bash
     run: |
       echo "Publishing package $PACKAGE_WITH_VERSION"
@@ -167,12 +166,15 @@ runs:
       git pull --rebase
       echo "Pushing to $WORKING_BRANCH without tags..."
       git push
-      echo "Deleting existing tag $VERSION_TAG if it exists."
-      git tag -d "$VERSION_TAG"
-      echo "Tagging $VERSION_TAG"
-      git tag -fa "$VERSION_TAG" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
-      echo "Pushing git tags."
-      git push --tags -f
+
+      if [ "$NO_TAG" <> "true" ]; then
+        echo "Deleting existing tag $VERSION_TAG if it exists."
+        echo "Tagging $VERSION_TAG"
+        git tag -d "$VERSION_TAG"
+        git tag -fa "$VERSION_TAG" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
+        echo "Pushing git tags."
+        git push --tags -f
+      fi
 
       echo "Running npm publish"
       npm publish
