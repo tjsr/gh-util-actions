@@ -1,5 +1,9 @@
 name: Verify the composite npm-dependency-pr action works
-on: push
+on: 
+  push:
+    paths:
+    - '.github/workflows/verify-dep-pr.yml'
+    - 'npm-dependency-pr/**'
 
 jobs:
   verify-outdated:
