@@ -153,6 +153,7 @@ runs:
     env:
       NODE_AUTH_TOKEN: ${{ inputs.token }}
       VERSION: ${{ steps.bump-version.outputs.version }}
+      VERSION_TAG: 'v${{ steps.bump-version.outputs.version }}'
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PREID: ${{ inputs.preid }}
 
@@ -166,10 +167,12 @@ runs:
       git pull --rebase
       echo "Pushing to $WORKING_BRANCH without tags..."
       git push
-      echo "Tagging $VERSION"
-      git tag -fa "v$VERSION" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
+      echo "Deleting existing tag $VERSION_TAG if it exists."
+      git tag -d "$VERSION_TAG"
+      echo "Tagging $VERSION_TAG"
+      git tag -fa "$VERSION_TAG" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
       echo "Pushing git tags."
-      git push --tags
+      git push --tags -f
 
       echo "Running npm publish"
       npm publish
