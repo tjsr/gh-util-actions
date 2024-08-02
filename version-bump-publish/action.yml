@@ -167,7 +167,7 @@ runs:
       echo "Pushing to $WORKING_BRANCH without tags..."
       git push
       echo "Tagging $VERSION"
-      git tag -fa "$VERSION"
+      git tag -fa "$VERSION" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
       echo "Pushing git tags."
       git push --tags
 
