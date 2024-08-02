@@ -28,8 +28,18 @@ else
 fi
 
 PUBLISHED_VERSIONS=$(npm view "$PACKAGE_NAME" versions --json |jq -r '.[]' | tr '\n' ' ' | awk '{$1=$1; print}')
+if [ -z "$PUBLISHED_VERSIONS" ]; then
+  echo "No published versions found for this package"
+  exit 1
+fi
 # echo "Versions published for this package: $PUBLISHED_VERSIONS"
 MATCHING_BRANCH_VERSION=$(npx semver -p $PREID_SWITCH -r ">= $PACKAGE_VERSION_NUMBER" $PUBLISHED_VERSIONS |tail -1)
+if [ -z "$MATCHING_BRANCH_VERSION" ]; then
+  echo "No matching branch version found for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER"
+  echo PUBLISHED_VERSIONS from npm view was: $PUBLISHED_VERSIONS
+  exit 1
+fi
+
 NEXT_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID_SWITCH $MATCHING_BRANCH_VERSION)
 echo "Got latest version for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER => $MATCHING_BRANCH_VERSION"
 
