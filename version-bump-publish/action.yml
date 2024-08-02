@@ -158,7 +158,7 @@ runs:
     run: |
       echo "Publishing package $PACKAGE_WITH_VERSION"
       echo "preid=$PREID"
-      git add package.json package-lock.json
+      # git add package.json package-lock.json
       # git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
       git push
       git push --tags
