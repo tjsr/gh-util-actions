@@ -146,45 +146,54 @@ runs:
   #     echo "PR will be based off branch $BASE_BRANCH"
   #     echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
 
+  - name: Commit and push package.json files
+    id: push-package-json
+    if: ${{ inputs.no-publish != 'true' }}
+    env:
+      PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
+    shell: bash
+    run: |
+      echo "Publishing package $PACKAGE_WITH_VERSION"
+      git add package.json package-lock.json
+      git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
+      git pull --rebase
+      echo "Pushing to $WORKING_BRANCH without tags..."
+      git push
+
+  - name: Tag if required
+    id: git-tag
+    if: ${{ inputs.no-tag != 'true' }}
+    shell: bash
+    env:
+      VERSION_TAG: 'v${{ steps.bump-version.outputs.version }}'
+      PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
+    run: |
+      if git tag | grep -q "^$VERSION_TAG$"; then
+        echo "Tag $VERSION_TAG exists, deleting first..."
+        echo "Deleting existing tag $VERSION_TAG if it exists."
+        git tag -d "$VERSION_TAG"
+      else
+        echo "Tag $VERSION_TAG does not exist"
+      fi
+      echo "Tagging $VERSION_TAG"
+      git tag -fa "$VERSION_TAG" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
+
+      echo "Pushing git tags."
+      git push --tags -f
+
   - name: Publish the package
     id: publish-package
     if: ${{ inputs.no-publish != 'true' }}
     env:
       NODE_AUTH_TOKEN: ${{ inputs.token }}
-      VERSION: ${{ steps.bump-version.outputs.version }}
-      VERSION_TAG: 'v${{ steps.bump-version.outputs.version }}'
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PREID: ${{ inputs.preid }}
       NO_TAG: ${{ inputs.no-tag == 'true' }}
     shell: bash
     run: |
-      echo "Publishing package $PACKAGE_WITH_VERSION"
-      echo "preid=$PREID"
-      git add package.json package-lock.json
-      git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
-      git status      
-      git pull --rebase
-      echo "Pushing to $WORKING_BRANCH without tags..."
-      git push
-
-      if [ "$NO_TAG" <> "true" ]; then
-        if git tag | grep -q "^$VERSION_TAG$"; then
-          echo "Tag $VERSION_TAG exists, deleting first..."
-          echo "Deleting existing tag $VERSION_TAG if it exists."
-          git tag -d "$VERSION_TAG"
-        fi
-        echo "Tagging $VERSION_TAG"
-        git tag -fa "$VERSION_TAG" -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
-
-        echo "Pushing git tags."
-        git push --tags -f
-      else
-        echo "Tag $VERSION_TAG does not exist"
-      fi
-
       echo "Running npm publish"
       npm publish
-      if [ ! -z "$PREID" ]; then
+      if [ ! -z "$PREID" ] && [ "$NO_TAG" <> "true" ]; then
         npm dist-tag add $PACKAGE_WITH_VERSION $PREID
       fi
 
