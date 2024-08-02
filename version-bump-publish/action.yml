@@ -160,8 +160,8 @@ runs:
     run: |
       echo "Publishing package $PACKAGE_WITH_VERSION"
       echo "preid=$PREID"
-      # git add package.json package-lock.json
-      # git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
+      git add package.json package-lock.json
+      git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
       git status      
       git pull --rebase
       echo "Pushing to $WORKING_BRANCH without tags..."
