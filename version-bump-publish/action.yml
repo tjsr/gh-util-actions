@@ -161,7 +161,7 @@ runs:
       # git add package.json package-lock.json
       # git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
       git status
-      git pull
+      git pull --rebase
       git push
       git push --tags
       npm publish
