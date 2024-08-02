@@ -35,12 +35,14 @@ fi
 # echo "Versions published for this package: $PUBLISHED_VERSIONS"
 MATCHING_BRANCH_VERSION=$(npx semver -p $PREID_SWITCH -r ">= $PACKAGE_VERSION_NUMBER" $PUBLISHED_VERSIONS |tail -1)
 if [ -z "$MATCHING_BRANCH_VERSION" ]; then
-  echo "No matching version found for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER"
+  echo "No matching version found for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER.  Attempting to bump directly."
   echo PUBLISHED_VERSIONS from npm view was: $PUBLISHED_VERSIONS
-  exit 1
+
+  NEXT_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID_SWITCH $PACKAGE_VERSION_NUMBER)
+else
+  NEXT_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID_SWITCH $MATCHING_BRANCH_VERSION)
 fi
 
-NEXT_VERSION_NUMBER=$(npx semver --increment $PATCHLEVEL $PREID_SWITCH $MATCHING_BRANCH_VERSION)
 echo "Got latest version for $PACKAGE_NAME@$PACKAGE_VERSION_NUMBER => $MATCHING_BRANCH_VERSION"
 
 echo "Current package $PACKAGE_NAME version number is $PACKAGE_VERSION_NUMBER"
