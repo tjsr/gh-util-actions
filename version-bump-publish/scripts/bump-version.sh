@@ -41,8 +41,3 @@ npm version $NEXT_VERSION_NUMBER $NO_TAG
 echo "version=$NEXT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 echo "fullVersion=$PACKAGE_NAME@$NEXT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 echo "Project version number bumped to $PACKAGE_NAME@$NEXT_VERSION_NUMBER"
-
-echo "Pushing to git"
-git push --follow-tags
-echo "Checking git status"
-git status
