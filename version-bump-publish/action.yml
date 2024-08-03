@@ -172,10 +172,8 @@ runs:
     env:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
-      PR_BRANCH=$WORKING_BRANCH/bump-$PATCHLEVEL/${{ steps.bump-version.outputs.version }}
-      echo "PR_BRANCH=$PR_BRANCH" >> $GITHUB_ENV
-      echo "Creating branch $PR_BRANCH"
-      git checkout -b $PR_BRANCH
+      echo "Creating branch $WORKING_BRANCH"
+      git checkout -b $WORKING_BRANCH
 
   - name: Commit and push package.json files
     id: push-package-json
