@@ -144,7 +144,7 @@ runs:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
       if [ "$REQUIRES_PR" == 'true' ]; then
-        WORKING_BRANCH=$BASE_BRANCH/bump-$PATCHLEVEL/${{ steps.get-latest-version.outputs.nextVersion }}
+        WORKING_BRANCH=$BASE_BRANCH-bump-$PATCHLEVEL/${{ steps.get-latest-version.outputs.nextVersion }}
       else
         WORKING_BRANCH=${GITHUB_REF#refs/heads/}
       fi
