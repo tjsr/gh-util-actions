@@ -46,6 +46,11 @@ inputs:
     description: 'The scope to use for the .npmrc file if it needs overriding'
     required: false
     default: '@tjsr'
+  requiresPr:
+    type: boolean
+    description: 'Whether the action requires a PR to be raised'
+    required: false
+    default: false
 
 outputs:
   version:
@@ -70,10 +75,24 @@ runs:
 
   - name: Set script path
     shell: bash
+    env:
+      REQUIRES_PR: ${{ inputs.requiresPr }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
-      echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
+      SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts
+      echo "SCRIPT_DIR=$SCRIPT_DIR" >> $GITHUB_ENV
       echo SCRIPT_DIR is $SCRIPT_DIR
-      echo "WORKING_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      BASE_BRANCH=${GITHUB_REF#refs/heads/}
+      echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+      echo BASE_BRANCH is $BASE_BRANCH
+
+      if [ "$REQUIRES_PR" == 'true' ]; then
+        WORKING_BRANCH=$WORKING_BRANCH/bump-$PATCHLEVEL/${{ steps.bump-version.outputs.version }}
+      else
+        WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+      fi
+      echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
       echo WORKING_BRANCH is $WORKING_BRANCH
 
   # - name: Cache node config and node_modules
@@ -146,11 +165,23 @@ runs:
   #     echo "PR will be based off branch $BASE_BRANCH"
   #     echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
 
+  - name: Create a branch if a PR is required
+    id: create-branch
+    if: ${{ inputs.requiresPr == 'true' }}
+    shell: bash
+    env:
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: |
+      PR_BRANCH=$WORKING_BRANCH/bump-$PATCHLEVEL/${{ steps.bump-version.outputs.version }}
+      echo "PR_BRANCH=$PR_BRANCH" >> $GITHUB_ENV
+      echo "Creating branch $PR_BRANCH"
+      git checkout -b $PR_BRANCH
+
   - name: Commit and push package.json files
     id: push-package-json
-    if: ${{ inputs.no-publish != 'true' }}
     env:
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
+      REQUIRES_PR: ${{ inputs.requiresPr == 'true' }}
     shell: bash
     run: |
       echo "Publishing package $PACKAGE_WITH_VERSION"
@@ -159,6 +190,23 @@ runs:
       git pull --rebase
       echo "Pushing to $WORKING_BRANCH without tags..."
       git push
+
+  - name: Create a Pull Request for the changes
+    id: create-pr
+    if: ${{ inputs.requiresPr == 'true' }}
+    uses: peter-evans/create-pull-request@v6
+    with:
+      commit-message: Bump ${{ inputs.dependency }} to ${{ steps.bump-version.outputs.version }} via tjsr/gh-util-actions/version-bump-publish
+      title: Update ${{ inputs.dependency }} to ${{ steps.bump-version.outputs.version }}
+      base: ${{ env.BASE_BRANCH }}
+      branch: ${{ env.WORKING_BRANCH }}
+
+  - name: Add labels to the newly created PR
+    if: ${{ steps.create-pr.outputs.pull-request-number != '' && inputs.labels != '' }}
+    uses: tjsr/gh-util-actions/label-pr@main
+    with:
+      labels: '${{ inputs.patchlevel }}'
+      pr: ${{ steps.create-pr.outputs.pull-request-number }}
 
   - name: Tag if required
     id: git-tag
