@@ -76,7 +76,6 @@ runs:
   - name: Set script path
     shell: bash
     env:
-      REQUIRES_PR: ${{ inputs.requiresPr }}
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
       SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts
@@ -86,14 +85,6 @@ runs:
       BASE_BRANCH=${GITHUB_REF#refs/heads/}
       echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
       echo BASE_BRANCH is $BASE_BRANCH
-
-      if [ "$REQUIRES_PR" == 'true' ]; then
-        WORKING_BRANCH=$WORKING_BRANCH/bump-$PATCHLEVEL/${{ steps.bump-version.outputs.version }}
-      else
-        WORKING_BRANCH=${GITHUB_REF#refs/heads/}
-      fi
-      echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
-      echo WORKING_BRANCH is $WORKING_BRANCH
 
   # - name: Cache node config and node_modules
   #   uses: actions/cache@main
@@ -145,6 +136,20 @@ runs:
     run: |
       git config --global user.name "github-actions[bot]"
       git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+  - name: Set working branch
+    shell: bash
+    env:
+      REQUIRES_PR: ${{ inputs.requiresPr }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: |
+      if [ "$REQUIRES_PR" == 'true' ]; then
+        WORKING_BRANCH=$BASE_BRANCH/bump-$PATCHLEVEL/${{ steps.get-latest-version.outputs.nextVersion }}
+      else
+        WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+      fi
+      echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
+      echo WORKING_BRANCH is $WORKING_BRANCH
 
   - name: Set the version to the latest published version then bump the patch version
     id: bump-version
