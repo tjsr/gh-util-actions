@@ -179,6 +179,7 @@ runs:
     run: |
       echo "Creating branch $WORKING_BRANCH"
       git checkout -b $WORKING_BRANCH
+      git branch --set-upstream-to=origin/$WORKING_BRANCH $WORKING_BRANCH
 
   - name: Commit and push package.json files
     id: push-package-json
