@@ -32,7 +32,6 @@ runs:
   steps:
   - name: Create PR ${{ inputs.pr }} using the provided inputs
     uses: actions/github-script@v7
-    if: ${{ inputs.labels != '' }}
     with:
       script: |
         let inputLabels = `${{ inputs.labels }}`;
