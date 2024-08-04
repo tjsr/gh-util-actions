@@ -178,7 +178,7 @@ runs:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
       echo "Creating branch $WORKING_BRANCH"
-      git branch  $WORKING_BRANCH
+      git branch $WORKING_BRANCH
 
   - name: Commit and push package.json files
     id: push-package-json
@@ -199,8 +199,8 @@ runs:
     if: ${{ inputs.requiresPr == 'true' }}
     uses: peter-evans/create-pull-request@v6
     with:
-      commit-message: Bump ${{ inputs.dependency }} to ${{ steps.bump-version.outputs.version }} via tjsr/gh-util-actions/version-bump-publish
-      title: Update ${{ inputs.dependency }} to ${{ steps.bump-version.outputs.version }}
+      commit-message: Bump ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.nextVersion }} via tjsr/gh-util-actions/version-bump-publish
+      title: Update ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.nextVersion }}
       base: ${{ env.BASE_BRANCH }}
       branch: ${{ env.WORKING_BRANCH }}
 
