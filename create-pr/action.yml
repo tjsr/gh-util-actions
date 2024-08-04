@@ -1,0 +1,63 @@
+name: '@tjsr/gh-util-actions/create-pr'
+description: Create a PR from an existing branch
+author: Tim Rowe <tim@tjsr.id.au>
+inputs:
+  base:
+    type: string
+    description: 'The base branch to be merged back to'
+    required: true
+  branch:
+    type: string
+    description: 'The branch to be merged'
+    required: true
+  owner:
+    type: string
+    description: 'The owner of the repository.  Uses context.owner if not provided.'
+    required: false
+  repo:
+    type: string
+    description: 'The repository name. Uses context.repo if not provided.'
+    required: false
+  project-name:
+    type: string
+    description: 'The name of the project.'
+    required: false
+  full-version:
+    type: string
+    description: 'The full version of the project including name.'
+  
+runs:
+  using: 'composite'
+
+  steps:
+  - name: Create PR ${{ inputs.pr }} using the provided inputs
+    uses: actions/github-script@v7
+    if: ${{ inputs.labels != '' }}
+    with:
+      script: |
+        let inputLabels = `${{ inputs.labels }}`;
+
+        let body = 'Bump ${{ inputs.project-name }} to ${{ inputs.full-version }} via tjsr/gh-util-actions/create-pr';
+        let title = 'Update ${{ inputs.project-name }} to ${{ inputs.full-version }}';'
+        let base: '${{ inputs.base }}';
+        let head: '${{ inputs.branch }}';
+
+        let owner = '${{ inputs.owner }}';
+        owner = owner ? owner : context.repo.owner;
+        let repo = '${{ inputs.repo }}';
+        repo = repo ? repo : context.repo.repo;
+
+        const pull = await github.rest.pulls.create({
+          base: base,
+          head: head,
+          title: title,
+          body: body,
+          owner: owner,
+          repo: repo,
+          draft: false
+        });
+
+        return {
+          number: pull.number,
+          html_url: pull.html_url,
+        };

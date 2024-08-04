@@ -151,15 +151,15 @@ runs:
       echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
       echo WORKING_BRANCH is $WORKING_BRANCH
 
-  # - name: Create a branch if a PR is required
-  #   id: create-branch
-  #   if: ${{ inputs.requiresPr == 'true' }}
-  #   shell: bash
-  #   env:
-  #     PATCHLEVEL: ${{ inputs.patchlevel }}
-  #   run: |
-  #     echo "Creating branch $WORKING_BRANCH"
-  #     git switch -c $WORKING_BRANCH
+  - name: Create a branch if a PR is required
+    id: create-branch
+    if: ${{ inputs.requiresPr == 'true' }}
+    shell: bash
+    env:
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: |
+      echo "Creating branch $WORKING_BRANCH"
+      git switch -c $WORKING_BRANCH
 
   - name: Set the version to the latest published version then bump the patch version
     id: bump-version
@@ -181,59 +181,67 @@ runs:
     shell: bash
     run: exit 1
 
-  # - name: Get the base branch this version is based on.
-  #   id: base-branch
-  #   if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
-  #   shell: bash
-  #   run: |
-  #     BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
-  #     echo "PR will be based off branch $BASE_BRANCH"
-  #     echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
+  - name: Get the base branch this version is based on.
+    id: base-branch
+    if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
+    shell: bash
+    run: |
+      BASE_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+      echo "PR will be based off branch $BASE_BRANCH"
+      echo "branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
 
-  # - name: Commit and push package.json files to same branch
-  #   id: push-package-json
-  #   env:
-  #     PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
-  #     REQUIRES_PR: ${{ inputs.requiresPr == 'true' }}
-  #     NEXT_VERSION_NUMBER: ${{ steps.get-latest-version.outputs.nextVersion }}
-  #   shell: bash
-  #   run: |
-  #     echo "Current git status in commit step: "
-  #     git status
+  - name: Commit and push package.json files to same branch
+    id: push-package-json
+    env:
+      PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
+      REQUIRES_PR: ${{ inputs.requiresPr == 'true' }}
+      NEXT_VERSION_NUMBER: ${{ steps.get-latest-version.outputs.nextVersion }}
+    shell: bash
+    run: |
+      echo "Current git status in commit step: "
+      git status
 
-  #     CONFIRMED_PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
-  #     echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
-  #     if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
-  #       echo "Error: package.json was not written with the expected version number"
-  #       exit 1
-  #     fi
+      CONFIRMED_PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
+      echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
+      if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
+        echo "Error: package.json was not written with the expected version number"
+        exit 1
+      fi
 
-  #     echo "Adding package.json and package-lock.json to git index"
-  #     git add package.json package-lock.json
+      echo "Adding package.json and package-lock.json to git index"
+      git add package.json package-lock.json
 
-  #     echo "Committing $PACKAGE_WITH_VERSION package.json changes"
-  #     git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
+      echo "Committing $PACKAGE_WITH_VERSION package.json changes"
+      git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
 
-  #     # git pull --rebase
-  #     echo "Pushing to $WORKING_BRANCH without tags..."
-  #     git push -u origin $WORKING_BRANCH
+      # git pull --rebase
+      echo "Pushing to $WORKING_BRANCH without tags..."
+      git push -u origin $WORKING_BRANCH
 
-  #     echo "Current git status at end of commit/push step: "
-  #     git status
+      echo "Current git status at end of commit/push step: "
+      git status
 
   - name: Create a Pull Request for the changes
+    uses: tjsr/gh-util-actions/create-pr@develop/use-pr
     id: create-pr
     if: ${{ inputs.requiresPr == 'true' }}
-    uses: peter-evans/create-pull-request@v6
     with:
-      commit-message: Bump ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.fullVersion }} via tjsr/gh-util-actions/version-bump-publish
-      title: Update ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.fullVersion }}
-      # base: ${{ env.BASE_BRANCH }}
+      base: ${{ env.BASE_BRANCH }}
       branch: ${{ env.WORKING_BRANCH }}
-      add-paths: package.json, package-lock.json
-      token: ${{ inputs.token }}
-      labels: |
-        ${{ inputs.patchlevel }}
+
+  # - name: Create a Pull Request for the changes
+  #   id: create-pr
+  #   if: ${{ inputs.requiresPr == 'true' }}
+  #   uses: peter-evans/create-pull-request@v6
+  #   with:
+  #     commit-message: Bump ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.fullVersion }} via tjsr/gh-util-actions/version-bump-publish
+  #     title: Update ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.fullVersion }}
+  #     # base: ${{ env.BASE_BRANCH }}
+  #     branch: ${{ env.WORKING_BRANCH }}
+  #     add-paths: package.json, package-lock.json
+  #     token: ${{ inputs.token }}
+  #     labels: |
+  #       ${{ inputs.patchlevel }}
 
   - name: Add labels to the newly created PR
     if: ${{ steps.create-pr.outputs.pull-request-number != '' && inputs.labels != '' }}
