@@ -253,8 +253,8 @@ runs:
       echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
       if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
         echo "Error: package.json was not written with the expected version number"
-      exit 1
-    fi
+        exit 1
+      fi
 
   - name: Publish the package
     id: publish-package
