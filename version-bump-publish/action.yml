@@ -151,15 +151,15 @@ runs:
       echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
       echo WORKING_BRANCH is $WORKING_BRANCH
 
-  - name: Create a branch if a PR is required
-    id: create-branch
-    if: ${{ inputs.requiresPr == 'true' }}
-    shell: bash
-    env:
-      PATCHLEVEL: ${{ inputs.patchlevel }}
-    run: |
-      echo "Creating branch $WORKING_BRANCH"
-      git switch -c $WORKING_BRANCH
+  # - name: Create a branch if a PR is required
+  #   id: create-branch
+  #   if: ${{ inputs.requiresPr == 'true' }}
+  #   shell: bash
+  #   env:
+  #     PATCHLEVEL: ${{ inputs.patchlevel }}
+  #   run: |
+  #     echo "Creating branch $WORKING_BRANCH"
+  #     git switch -c $WORKING_BRANCH
 
   - name: Set the version to the latest published version then bump the patch version
     id: bump-version
