@@ -178,10 +178,9 @@ runs:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
       echo "Creating branch $WORKING_BRANCH"
-      git branch -t $WORKING_BRANCH
-      git switch $WORKING_BRANCH
+      git switch -c develop/require-pr-prerelease-test.1
 
-  - name: Commit and push package.json files
+  - name: Commit and push package.json files to same branch
     id: push-package-json
     env:
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
@@ -191,9 +190,9 @@ runs:
       echo "Publishing package $PACKAGE_WITH_VERSION"
       git add package.json package-lock.json
       git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
-      git pull --rebase
+      # git pull --rebase
       echo "Pushing to $WORKING_BRANCH without tags..."
-      git push
+      git push -u origin $WORKING_BRANCH
 
   - name: Create a Pull Request for the changes
     id: create-pr
