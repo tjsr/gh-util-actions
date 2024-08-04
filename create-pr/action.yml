@@ -31,32 +31,39 @@ runs:
 
   steps:
   - name: Create PR ${{ inputs.pr }} using the provided inputs
-    uses: actions/github-script@v7
-    with:
-      script: |
-        let inputLabels = `${{ inputs.labels }}`;
+    shell: bash
+    run: |
+      gh pr new \
+        -B ${{ inputs.base }} \
+        -H ${{ inputs.branch }} \
+        -t 'Update ${{ inputs.project-name }} to ${{ inputs.full-version }}' \
+        -b 'Bump ${{ inputs.project-name }} to ${{ inputs.full-version }} via tjsr/gh-util-actions/create-pr'
+    # uses: actions/github-script@v7
+    # with:
+    #   script: |
+    #     let inputLabels = `${{ inputs.labels }}`;
 
-        let body = 'Bump ${{ inputs.project-name }} to ${{ inputs.full-version }} via tjsr/gh-util-actions/create-pr';
-        let title = 'Update ${{ inputs.project-name }} to ${{ inputs.full-version }}';'
-        let base: '${{ inputs.base }}';
-        let head: '${{ inputs.branch }}';
+    #     let body = 'Bump ${{ inputs.project-name }} to ${{ inputs.full-version }} via tjsr/gh-util-actions/create-pr';
+    #     let title = 'Update ${{ inputs.project-name }} to ${{ inputs.full-version }}';'
+    #     let base: '${{ inputs.base }}';
+    #     let head: '${{ inputs.branch }}';
 
-        let owner = '${{ inputs.owner }}';
-        owner = owner ? owner : context.repo.owner;
-        let repo = '${{ inputs.repo }}';
-        repo = repo ? repo : context.repo.repo;
+    #     let owner = '${{ inputs.owner }}';
+    #     owner = owner ? owner : context.repo.owner;
+    #     let repo = '${{ inputs.repo }}';
+    #     repo = repo ? repo : context.repo.repo;
 
-        const pull = await github.rest.pulls.create({
-          base: base,
-          head: head,
-          title: title,
-          body: body,
-          owner: owner,
-          repo: repo,
-          draft: false
-        });
+    #     const pull = github.rest.pulls.create({
+    #       base: base,
+    #       head: head,
+    #       title: title,
+    #       body: body,
+    #       owner: owner,
+    #       repo: repo,
+    #       draft: false
+    #     });
 
-        return {
-          number: pull.number,
-          html_url: pull.html_url,
-        };
+    #     return {
+    #       number: pull.number,
+    #       html_url: pull.html_url,
+    #     };
