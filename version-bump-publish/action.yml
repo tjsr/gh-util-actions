@@ -201,6 +201,9 @@ runs:
       echo "Current git status in commit step: "
       git status
 
+      git fetch
+      git status
+
       CONFIRMED_PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
       echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
       if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
