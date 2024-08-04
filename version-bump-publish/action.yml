@@ -178,7 +178,8 @@ runs:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
       echo "Creating branch $WORKING_BRANCH"
-      git branch $WORKING_BRANCH
+      git branch -t $WORKING_BRANCH
+      git switch $WORKING_BRANCH
 
   - name: Commit and push package.json files
     id: push-package-json
