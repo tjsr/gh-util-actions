@@ -178,7 +178,7 @@ runs:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
       echo "Creating branch $WORKING_BRANCH"
-      git switch -c develop/require-pr-prerelease-test.1
+      git switch -c $WORKING_BRANCH
 
   - name: Commit and push package.json files to same branch
     id: push-package-json
@@ -218,6 +218,7 @@ runs:
     env:
       VERSION_TAG: 'v${{ steps.bump-version.outputs.version }}'
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
+      PACKAGE_NAME: ${{ steps.get-latest-version.outputs.name }}
     run: |
       if git tag | grep -q "^$VERSION_TAG$"; then
         echo "Tag $VERSION_TAG exists, deleting first..."
