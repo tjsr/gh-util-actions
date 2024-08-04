@@ -173,10 +173,12 @@ runs:
 
   - name: Fail if the version bump script failed
     if: ${{ steps.bump-version.outputs.version == '' }}
+    shell: bash
     run: exit 1
 
   - name: Fail if the fullVersion is not a value
     if: ${{ steps.bump-version.outputs.fullVersion == '' }}
+    shell: bash
     run: exit 1
 
   # - name: Get the base branch this version is based on.
