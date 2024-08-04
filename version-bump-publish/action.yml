@@ -171,6 +171,14 @@ runs:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: $SCRIPT_DIR/bump-version.sh
 
+  - name: Fail if the version bump script failed
+    if: ${{ steps.bump-version.outputs.version == '' }}
+    run: exit 1
+
+  - name: Fail if the fullVersion is not a value
+    if: ${{ steps.bump-version.outputs.fullVersion == '' }}
+    run: exit 1
+
   # - name: Get the base branch this version is based on.
   #   id: base-branch
   #   if: steps.get-version.outputs.hasNewVersion == 'true' && steps.check-pr-exists.outputs.exists == 'false'
@@ -187,7 +195,7 @@ runs:
       REQUIRES_PR: ${{ inputs.requiresPr == 'true' }}
     shell: bash
     run: |
-      echo "Publishing package $PACKAGE_WITH_VERSION"
+      echo "Committing $PACKAGE_WITH_VERSION package.json changes"
       git add package.json package-lock.json
       git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
       # git pull --rebase
@@ -199,8 +207,8 @@ runs:
     if: ${{ inputs.requiresPr == 'true' }}
     uses: peter-evans/create-pull-request@v6
     with:
-      commit-message: Bump ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.nextVersion }} via tjsr/gh-util-actions/version-bump-publish
-      title: Update ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.nextVersion }}
+      commit-message: Bump ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.fullVersion }} via tjsr/gh-util-actions/version-bump-publish
+      title: Update ${{ steps.get-latest-version.outputs.name }} to ${{ steps.bump-version.outputs.fullVersion }}
       base: ${{ env.BASE_BRANCH }}
       branch: ${{ env.WORKING_BRANCH }}
 
@@ -232,6 +240,19 @@ runs:
 
       echo "Pushing git tags."
       git push --tags -f
+
+  - name: Verify the version in package.json matches what we expect
+    id: verify-version
+    shell: bash
+    env:
+      NEXT_VERSION_NUMBER: ${{ steps.get-latest-version.outputs.nextVersion }}
+    run: |
+      CONFIRMED_PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
+      echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
+      if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
+        echo "Error: package.json was not written with the expected version number"
+      exit 1
+    fi
 
   - name: Publish the package
     id: publish-package

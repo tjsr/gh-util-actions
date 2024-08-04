@@ -35,3 +35,10 @@ npm version $NEXT_VERSION_NUMBER --no-git-tag-version
 echo "version=$NEXT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 echo "fullVersion=$PACKAGE_NAME@$NEXT_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
 echo "Project version number bumped to $PACKAGE_NAME@$NEXT_VERSION_NUMBER"
+
+CONFIRMED_PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
+echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
+if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
+  echo "Error: package.json was not written with the expected version number"
+  exit 1
+fi
