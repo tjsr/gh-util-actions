@@ -247,7 +247,7 @@ runs:
   #       ${{ inputs.patchlevel }}
 
   - name: Add labels to the newly created PR
-    if: ${{ steps.create-pr.outputs.pull-request-number != '' && inputs.labels != '' }}
+    if: ${{ inputs.requiresPr == 'true' && steps.create-pr.outputs.pull-request-number != '' && inputs.labels != '' }}
     uses: tjsr/gh-util-actions/label-pr@main
     with:
       labels: '${{ inputs.patchlevel }}'
