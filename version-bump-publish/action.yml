@@ -204,6 +204,9 @@ runs:
       echo "Pushing to $WORKING_BRANCH without tags..."
       git push -u origin $WORKING_BRANCH
 
+      echo "Current git status at end of commit/push step: "
+      git status
+
   - name: Create a Pull Request for the changes
     id: create-pr
     if: ${{ inputs.requiresPr == 'true' }}
@@ -230,6 +233,9 @@ runs:
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PACKAGE_NAME: ${{ steps.get-latest-version.outputs.name }}
     run: |
+      echo "Current git status in tag step: "
+      git status
+
       if git tag | grep -q "^$VERSION_TAG$"; then
         echo "Tag $VERSION_TAG exists, deleting first..."
         echo "Deleting existing tag $VERSION_TAG if it exists."
@@ -249,6 +255,9 @@ runs:
     env:
       NEXT_VERSION_NUMBER: ${{ steps.get-latest-version.outputs.nextVersion }}
     run: |
+      echo "Current git status in verify step: "
+      git status
+
       CONFIRMED_PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
       echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
       if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
@@ -266,6 +275,9 @@ runs:
       NO_TAG: ${{ inputs.no-tag == 'true' }}
     shell: bash
     run: |
+      echo "Current git status in publish step: "
+      git status
+
       echo "Running npm publish"
       npm publish
       if [ ! -z "$PREID" ] && [ "$NO_TAG" <> "true" ]; then
