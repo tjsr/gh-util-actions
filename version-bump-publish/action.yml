@@ -197,6 +197,9 @@ runs:
       REQUIRES_PR: ${{ inputs.requiresPr == 'true' }}
     shell: bash
     run: |
+      echo "Current git status in commit step: "
+      git status
+
       echo "Committing $PACKAGE_WITH_VERSION package.json changes"
       git add package.json package-lock.json
       git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
@@ -259,7 +262,7 @@ runs:
       git status
 
       CONFIRMED_PACKAGE_VERSION_NUMBER=$(cat package.json | jq -r '.version')
-      echo "Confirmed packags.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
+      echo "Confirmed package.json was written with version $CONFIRMED_PACKAGE_VERSION_NUMBER - should be $NEXT_VERSION_NUMBER"
       if [ "$CONFIRMED_PACKAGE_VERSION_NUMBER" != "$NEXT_VERSION_NUMBER" ]; then
         echo "Error: package.json was not written with the expected version number"
         exit 1
