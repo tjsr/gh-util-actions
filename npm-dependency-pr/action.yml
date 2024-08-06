@@ -20,7 +20,7 @@ inputs:
     required: false
   nodeVersion:
     type: string
-    description: 'The npm version to install with setup-node. If not provided, will not be installed. Scope will default to the current user, and repository to npm.pkg.github.com.  If you wish to customise these values, setup node manually.'
+    description: 'The node version to install with setup-node. If not provided, will not be installed. Scope will default to the current user, and repository to npm.pkg.github.com.  If you wish to customise these values, setup node manually.'
     required: false
   npmVersion:
     type: string
@@ -75,15 +75,17 @@ runs:
   - uses: actions/setup-node@v4
     if: inputs.nodeVersion
     with:
-      node-version: 20.15.1
+      node-version: ${{ inputs.nodeVersion }}
       # cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
       # Defaults to the user or organization that owns the workflow file
       scope: "@${{ github.organization }}"
 
-  - name: Install npm ${{ inputs.npmVersion}}
-    run: npm install -g npm@${{ inputs.npmVersion}}
+  - name: Install npm ${{ inputs.npmVersion }}
+    env:
+      NPM_VERSION: ${{ inputs.npmVersion }}
     shell: bash
+    run: npm install -g npm@$NPM_VERSION
 
   - name: Cache node modules
     id: cache-node_modules
