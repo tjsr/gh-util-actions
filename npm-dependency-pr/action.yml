@@ -81,7 +81,7 @@ runs:
       # Defaults to the user or organization that owns the workflow file
       scope: "@${{ github.organization }}"
 
-  - name: Install npm ${{ inputs.npmVersion}}
+  - name: Install npm ${{ inputs.npmVersion }}
     env:
       NPM_VERSION: ${{ inputs.npmVersion }}
     shell: bash
