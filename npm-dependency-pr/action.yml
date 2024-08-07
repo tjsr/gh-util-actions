@@ -123,7 +123,7 @@ runs:
     id: get-version
     env:
       LATEST_VERSION: ${{ steps.get-latest-version.outputs.latest }}
-      WANTED_VERSION: ${{ steps.get-latest-version.outputs.latest }}
+      WANTED_VERSION: ${{ steps.get-latest-version.outputs.wanted }}
       SPECIFIED_VERSION: ${{ inputs.packageVersion }}
     run: |
       if [ -z "$SPECIFIED_VERSION" ]; then
