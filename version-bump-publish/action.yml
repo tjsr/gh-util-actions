@@ -21,11 +21,6 @@ inputs:
     description: "Bump the version number, but don't tag the commit"
     required: false
     default: false
-  npm-version:
-    type: string
-    description: 'The npm version to install before running the action'
-    default: 'latest'
-    required: false
   patchlevel:
     type: string
     description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
