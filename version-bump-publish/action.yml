@@ -71,8 +71,20 @@ runs:
   - name: Set script path
     shell: bash
     run: |
-      echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
+      SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts
+      echo "SCRIPT_DIR=$SCRIPT_DIR" >> $GITHUB_ENV
       echo SCRIPT_DIR is $SCRIPT_DIR
+
+  - name: Set the base branch for any PR
+    shell: bash
+    run: |
+      BASE_BRANCH=${GITHUB_REF#refs/heads/}
+      echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+      echo BASE_BRANCH is $BASE_BRANCH
+
+  - name: Set working branch
+    shell: bash
+    run: |
       echo "WORKING_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       echo WORKING_BRANCH is $WORKING_BRANCH
 
