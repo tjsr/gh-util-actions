@@ -34,6 +34,7 @@ runs:
 
   - name: Fail if token not provided
     if: ${{ inputs.token == '' }}
+    shell: bash
     run: |
       token must be provided for node setup.
       exit 1
@@ -48,7 +49,7 @@ runs:
       registry-url: 'https://npm.pkg.github.com'
       scope: "${{ inputs.scope }}"
 
-  - namne: Setup NODE_AUTH_TOKEN if a token is provided
+  - name: Setup NODE_AUTH_TOKEN if a token is provided
     shell: bash
     run: |
       echo "NODE_AUTH_TOKEN=${{ inputs.token }}" >> $GITHUB_ENV
