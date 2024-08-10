@@ -81,10 +81,15 @@ runs:
       REQUIRES_PR: ${{ inputs.requiresPr }}
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
-      if [ "$REQUIRES_PR" == 'true' ]; then
-        WORKING_BRANCH=$BASE_BRANCH-bump-$PATCHLEVEL/${{ steps.get-latest-version.outputs.nextVersion }}
+      SHORT_BRANCH_NAME=${GITHUB_REF#refs/heads/}
+      if [ "$SHORT_BRANCH_NAME" == 'main' ]; then
+        WORKING_BRANCH=release/${{ steps.get-latest-version.outputs.nextVersion }}
       else
-        WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+        if [ "$REQUIRES_PR" == 'true' ]; then
+          WORKING_BRANCH=release/dev/${{ steps.get-latest-version.outputs.nextVersion }}
+        else
+          WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+        fi
       fi
       echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
       echo WORKING_BRANCH is $WORKING_BRANCH
