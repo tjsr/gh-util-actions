@@ -6,11 +6,6 @@ inputs:
     type: string
     description: 'The GitHub token to use for PR creation'
     required: true
-  cache-key:
-    type: string
-    description: 'The key to use for the node cache'
-    required: false
-    default: 'node-cache'
   no-publish:
     type: boolean
     description: "Bump the version number, but don't publish the package"
@@ -21,16 +16,6 @@ inputs:
     description: "Bump the version number, but don't tag the commit"
     required: false
     default: false
-  node-version:
-    type: string
-    description: 'The node version to install before running the action'
-    required: false
-    default: '20.15.1'
-  npm-version:
-    type: string
-    description: 'The npm version to install before running the action'
-    default: 'latest'
-    required: false
   patchlevel:
     type: string
     description: 'The release level to use for the new version number. [*prerelease|patch|minor|major]'
@@ -41,11 +26,11 @@ inputs:
     description: 'The version preid portion to use in the version string, eg "dev"=>1.0.0-dev.0. Requires "release" for not value.'
     required: false
     default: 'dev'
-  scope:
-    type: string
-    description: 'The scope to use for the .npmrc file if it needs overriding'
+  requiresPr:
+    type: boolean
+    description: 'Whether to raise a PR for the new version'
     required: false
-    default: '@tjsr'
+    default: false
 
 outputs:
   version:
@@ -71,40 +56,16 @@ runs:
   - name: Set script path
     shell: bash
     run: |
-      echo "SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts" >> $GITHUB_ENV
+      SCRIPT_DIR=$GITHUB_ACTION_PATH/scripts
+      echo "SCRIPT_DIR=$SCRIPT_DIR" >> $GITHUB_ENV
       echo SCRIPT_DIR is $SCRIPT_DIR
-      echo "WORKING_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      echo WORKING_BRANCH is $WORKING_BRANCH
 
-  # - name: Cache node config and node_modules
-  #   uses: actions/cache@main
-  #   id: node-cache
-  #   with:
-  #     path: |
-  #       /home/runner/.npm
-  #       /home/runner/work/_temp/.npmrc
-  #       ~/node_modules
-  #     key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
-  #     restore-keys: |
-  #       ${{ runner.OS }}-npm-cache-${{ github.github.run_id }}-${{ github.run_number }}
-  #       ${{ runner.OS }}-npm-cache-
-
-  # Setup .npmrc file to publish to GitHub Packages
-  - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
-    uses: actions/setup-node@v4
-    # if: ${{ steps.node-cache.outputs.cache-hit != true }}
-    with:
-      always-auth: true
-      node-version: ${{ inputs.node-version}}
-      cache: 'npm'
-      registry-url: 'https://npm.pkg.github.com'
-      scope: "${{ inputs.scope }}"
-      # token: "${{ inputs.token }}"
-
-  - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
-    # if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
-    run: npm install -g npm@${{ inputs.npm-version }}
+  - name: Set the base branch for any PR
     shell: bash
+    run: |
+      BASE_BRANCH=${GITHUB_REF#refs/heads/}
+      echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+      echo BASE_BRANCH is $BASE_BRANCH
 
   - name: Get the latest published version number
     id: get-latest-version
@@ -113,6 +74,32 @@ runs:
       PREID: ${{ inputs.preid }}
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: $SCRIPT_DIR/current-package.sh
+
+  - name: Set working branch
+    shell: bash
+    env:
+      REQUIRES_PR: ${{ inputs.requiresPr }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: |
+      if [ "$REQUIRES_PR" == 'true' ]; then
+        WORKING_BRANCH=$BASE_BRANCH-bump-$PATCHLEVEL/${{ steps.get-latest-version.outputs.nextVersion }}
+      else
+        WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+      fi
+      echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
+      echo WORKING_BRANCH is $WORKING_BRANCH
+
+  - name: Create a branch if a PR is required
+    id: create-branch
+    if: ${{ inputs.requiresPr == 'true' }}
+    shell: bash
+    env:
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: |
+      echo "Creating branch $WORKING_BRANCH"
+      git switch -c $WORKING_BRANCH
+      git rebase $BASE_BRANCH
+      git push -u origin $WORKING_BRANCH
 
   - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
     id: install

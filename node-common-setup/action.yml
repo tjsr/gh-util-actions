@@ -32,6 +32,12 @@ runs:
   using: 'composite'
   steps:
 
+  - name: Fail if token not provided
+    if: ${{ inputs.token == '' }}
+    run: |
+      token must be provided for node setup.
+      exit 1
+
   # Setup .npmrc file to publish to GitHub Packages
   - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
     uses: actions/setup-node@v4
@@ -41,7 +47,11 @@ runs:
       cache: 'npm'
       registry-url: 'https://npm.pkg.github.com'
       scope: "${{ inputs.scope }}"
-      # token: "${{ inputs.token }}"
+
+  - namne: Setup NODE_AUTH_TOKEN if a token is provided
+    shell: bash
+    run: |
+      echo "NODE_AUTH_TOKEN=${{ inputs.token }}" >> $GITHUB_ENV
 
   - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
     if: ${{ inputs.npm-version != '' }}
