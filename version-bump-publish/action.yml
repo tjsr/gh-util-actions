@@ -82,12 +82,6 @@ runs:
       echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
       echo BASE_BRANCH is $BASE_BRANCH
 
-  - name: Set working branch
-    shell: bash
-    run: |
-      echo "WORKING_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      echo WORKING_BRANCH is $WORKING_BRANCH
-
   # - name: Cache node config and node_modules
   #   uses: actions/cache@main
   #   id: node-cache
@@ -125,6 +119,30 @@ runs:
       PREID: ${{ inputs.preid }}
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: $SCRIPT_DIR/current-package.sh
+
+  - name: Set working branch
+    shell: bash
+    env:
+      REQUIRES_PR: ${{ inputs.requiresPr }}
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: |
+      if [ "$REQUIRES_PR" == 'true' ]; then
+        WORKING_BRANCH=$BASE_BRANCH-bump-$PATCHLEVEL/${{ steps.get-latest-version.outputs.nextVersion }}
+      else
+        WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+      fi
+      echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
+      echo WORKING_BRANCH is $WORKING_BRANCH
+
+  - name: Create a branch if a PR is required
+    id: create-branch
+    if: ${{ inputs.requiresPr == 'true' }}
+    shell: bash
+    env:
+      PATCHLEVEL: ${{ inputs.patchlevel }}
+    run: |
+      echo "Creating branch $WORKING_BRANCH"
+      git switch -c $WORKING_BRANCH
 
   - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
     id: install
