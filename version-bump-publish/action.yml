@@ -6,11 +6,6 @@ inputs:
     type: string
     description: 'The GitHub token to use for PR creation'
     required: true
-  cache-key:
-    type: string
-    description: 'The key to use for the node cache'
-    required: false
-    default: 'node-cache'
   no-publish:
     type: boolean
     description: "Bump the version number, but don't publish the package"
