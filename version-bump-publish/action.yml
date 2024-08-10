@@ -21,11 +21,6 @@ inputs:
     description: "Bump the version number, but don't tag the commit"
     required: false
     default: false
-  node-version:
-    type: string
-    description: 'The node version to install before running the action'
-    required: false
-    default: '20.15.1'
   npm-version:
     type: string
     description: 'The npm version to install before running the action'
@@ -41,11 +36,6 @@ inputs:
     description: 'The version preid portion to use in the version string, eg "dev"=>1.0.0-dev.0. Requires "release" for not value.'
     required: false
     default: 'dev'
-  scope:
-    type: string
-    description: 'The scope to use for the .npmrc file if it needs overriding'
-    required: false
-    default: '@tjsr'
 
 outputs:
   version:
@@ -81,36 +71,6 @@ runs:
       BASE_BRANCH=${GITHUB_REF#refs/heads/}
       echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
       echo BASE_BRANCH is $BASE_BRANCH
-
-  # - name: Cache node config and node_modules
-  #   uses: actions/cache@main
-  #   id: node-cache
-  #   with:
-  #     path: |
-  #       /home/runner/.npm
-  #       /home/runner/work/_temp/.npmrc
-  #       ~/node_modules
-  #     key: ${{ inputs.cache-key || format('{0}-npm-cache-{1}-{2}', runner.OS, github.run_id, github.run_number) }}
-  #     restore-keys: |
-  #       ${{ runner.OS }}-npm-cache-${{ github.github.run_id }}-${{ github.run_number }}
-  #       ${{ runner.OS }}-npm-cache-
-
-  # # Setup .npmrc file to publish to GitHub Packages
-  # - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
-  #   uses: actions/setup-node@v4
-  #   # if: ${{ steps.node-cache.outputs.cache-hit != true }}
-  #   with:
-  #     always-auth: true
-  #     node-version: ${{ inputs.node-version}}
-  #     cache: 'npm'
-  #     registry-url: 'https://npm.pkg.github.com'
-  #     scope: "${{ inputs.scope }}"
-  #     # token: "${{ inputs.token }}"
-
-  - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
-    # if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
-    run: npm install -g npm@${{ inputs.npm-version }}
-    shell: bash
 
   - name: Get the latest published version number
     id: get-latest-version
