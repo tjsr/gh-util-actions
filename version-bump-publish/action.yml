@@ -95,17 +95,17 @@ runs:
   #       ${{ runner.OS }}-npm-cache-${{ github.github.run_id }}-${{ github.run_number }}
   #       ${{ runner.OS }}-npm-cache-
 
-  # Setup .npmrc file to publish to GitHub Packages
-  - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
-    uses: actions/setup-node@v4
-    # if: ${{ steps.node-cache.outputs.cache-hit != true }}
-    with:
-      always-auth: true
-      node-version: ${{ inputs.node-version}}
-      cache: 'npm'
-      registry-url: 'https://npm.pkg.github.com'
-      scope: "${{ inputs.scope }}"
-      # token: "${{ inputs.token }}"
+  # # Setup .npmrc file to publish to GitHub Packages
+  # - name: "Setup .npmrc file for scope @${{ inputs.scope }}"
+  #   uses: actions/setup-node@v4
+  #   # if: ${{ steps.node-cache.outputs.cache-hit != true }}
+  #   with:
+  #     always-auth: true
+  #     node-version: ${{ inputs.node-version}}
+  #     cache: 'npm'
+  #     registry-url: 'https://npm.pkg.github.com'
+  #     scope: "${{ inputs.scope }}"
+  #     # token: "${{ inputs.token }}"
 
   - name: Install npm ${{ inputs.npm-version || ' or skip if no version specified' }}
     # if: ${{ inputs.npm-version != '' || !steps.node-cache.outputs.cache-hit }}
