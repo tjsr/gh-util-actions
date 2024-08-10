@@ -26,6 +26,11 @@ inputs:
     description: 'The version preid portion to use in the version string, eg "dev"=>1.0.0-dev.0. Requires "release" for not value.'
     required: false
     default: 'dev'
+  requiresPr:
+    type: boolean
+    description: 'Whether to raise a PR for the new version'
+    required: false
+    default: false
 
 outputs:
   version:
