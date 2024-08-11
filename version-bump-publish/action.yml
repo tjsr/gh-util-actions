@@ -102,9 +102,25 @@ runs:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
       echo "Switching to and creating branch $WORKING_BRANCH on $BASE_BRANCH"
-      git switch -c $WORKING_BRANCH
-      echo "Rebasing $WORKING_BRANCH on $BASE_BRANCH"
-      git rebase $BASE_BRANCH
+      if git show-ref --verify --quiet refs/heads/$WORKING_BRANCH; then
+        echo "Branch $WORKING_BRANCH already exists locally. Switching to it."
+        git switch $WORKING_BRANCH
+      else
+        echo "Branch $WORKING_BRANCH does not exist locally. Creating and switching to it."
+        git switch -c $WORKING_BRANCH
+      fi
+
+      echo "Fetching latest changes from origin"
+      git fetch origin
+
+      if git show-ref --verify --quiet refs/remotes/origin/$WORKING_BRANCH; then
+        echo "Branch $WORKING_BRANCH exists on remote. Rebasing onto origin/$WORKING_BRANCH"
+        git rebase origin/$WORKING_BRANCH
+      else
+        echo "Branch $WORKING_BRANCH does not exist on remote. Rebasing onto $BASE_BRANCH"
+        git rebase $BASE_BRANCH
+      fi
+
       # echo "Pushing to $WORKING_BRANCH"
       # git push -u origin $WORKING_BRANCH
 
