@@ -101,9 +101,11 @@ runs:
     env:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
-      echo "Creating branch $WORKING_BRANCH"
+      echo "Switching to and creating branch $WORKING_BRANCH on $BASE_BRANCH"
       git switch -c $WORKING_BRANCH
+      echo "Rebasing $WORKING_BRANCH on $BASE_BRANCH"
       git rebase $BASE_BRANCH
+      echo "Pushing to $WORKING_BRANCH"
       git push -u origin $WORKING_BRANCH
 
   - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
