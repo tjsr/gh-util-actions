@@ -81,10 +81,15 @@ runs:
       REQUIRES_PR: ${{ inputs.requiresPr }}
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
-      if [ "$REQUIRES_PR" == 'true' ]; then
-        WORKING_BRANCH=$BASE_BRANCH-bump-$PATCHLEVEL/${{ steps.get-latest-version.outputs.nextVersion }}
+      SHORT_BRANCH_NAME=${GITHUB_REF#refs/heads/}
+      if [ "$SHORT_BRANCH_NAME" == 'main' ]; then
+        WORKING_BRANCH=release/${{ steps.get-latest-version.outputs.nextVersion }}
       else
-        WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+        if [ "$REQUIRES_PR" == 'true' ]; then
+          WORKING_BRANCH=release/dev/${{ steps.get-latest-version.outputs.nextVersion }}
+        else
+          WORKING_BRANCH=${GITHUB_REF#refs/heads/}
+        fi
       fi
       echo "WORKING_BRANCH=$WORKING_BRANCH" >> $GITHUB_ENV
       echo WORKING_BRANCH is $WORKING_BRANCH
@@ -96,10 +101,12 @@ runs:
     env:
       PATCHLEVEL: ${{ inputs.patchlevel }}
     run: |
-      echo "Creating branch $WORKING_BRANCH"
+      echo "Switching to and creating branch $WORKING_BRANCH on $BASE_BRANCH"
       git switch -c $WORKING_BRANCH
+      echo "Rebasing $WORKING_BRANCH on $BASE_BRANCH"
       git rebase $BASE_BRANCH
-      git push -u origin $WORKING_BRANCH
+      # echo "Pushing to $WORKING_BRANCH"
+      # git push -u origin $WORKING_BRANCH
 
   - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
     id: install
@@ -140,13 +147,7 @@ runs:
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PACKAGE_NAME: ${{ steps.get-latest-version.outputs.name }}
     shell: bash
-    run: |
-      echo "Publishing package $PACKAGE_WITH_VERSION"
-      git add package.json package-lock.json
-      git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
-      git pull --rebase
-      echo "Pushing to $WORKING_BRANCH without tags..."
-      git push
+    run: $SCRIPT_DIR/git-package-branch.sh
 
   - name: Tag if required
     id: git-tag
