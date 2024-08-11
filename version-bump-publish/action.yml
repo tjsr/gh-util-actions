@@ -147,13 +147,7 @@ runs:
       PACKAGE_WITH_VERSION: ${{ steps.bump-version.outputs.fullVersion }}
       PACKAGE_NAME: ${{ steps.get-latest-version.outputs.name }}
     shell: bash
-    run: |
-      echo "Publishing package $PACKAGE_WITH_VERSION"
-      git add package.json package-lock.json
-      git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
-      git pull --rebase origin $WORKING_BRANCH
-      echo "Pushing to $WORKING_BRANCH without tags..."
-      git push -u origin $WORKING_BRANCH
+    run: $SCRIPT_DIR/git-package-branch.sh
 
   - name: Tag if required
     id: git-tag
