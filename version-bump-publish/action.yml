@@ -105,8 +105,8 @@ runs:
       git switch -c $WORKING_BRANCH
       echo "Rebasing $WORKING_BRANCH on $BASE_BRANCH"
       git rebase $BASE_BRANCH
-      echo "Pushing to $WORKING_BRANCH"
-      git push -u origin $WORKING_BRANCH
+      # echo "Pushing to $WORKING_BRANCH"
+      # git push -u origin $WORKING_BRANCH
 
   - name: Install ${{ steps.get-latest-version.outputs.name }} dependencies
     id: install
@@ -153,7 +153,7 @@ runs:
       git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
       git pull --rebase
       echo "Pushing to $WORKING_BRANCH without tags..."
-      git push
+      git push -u origin $WORKING_BRANCH
 
   - name: Tag if required
     id: git-tag
