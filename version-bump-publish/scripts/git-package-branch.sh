@@ -22,6 +22,9 @@ if [ -z "$WORKING_BRANCH" ]; then
   exit 1
 fi
 
+CURRENT_BRANCH=$(git branch --show-current)
+echo "Current branch is $CURRENT_BRANCH"
+
 echo "Adding package.json files to index for $PACKAGE_WITH_VERSION"
 git add package.json package-lock.json
 
