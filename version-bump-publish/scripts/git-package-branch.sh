@@ -28,8 +28,12 @@ git add package.json package-lock.json
 echo "Committing change for $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
 git commit -m "Update $PACKAGE_NAME to $PACKAGE_WITH_VERSION"
 
-echo "Pulling from $BASE_BRANCH with rebase"
-git pull --rebase origin $BASE_BRANCH
+if [ ! -z "$REBASE_TO_MAIN" ]; then
+  echo "Pulling from $BASE_BRANCH with rebase"
+  git pull --rebase origin $BASE_BRANCH
+else
+  echo "Not rebasing to $BASE_BRANCH at this time"
+fi
 
 if [ $? -ne 0 ]; then
   echo "Failed to pull and rebase from $WORKING_BRANCH, git status command gives:"
