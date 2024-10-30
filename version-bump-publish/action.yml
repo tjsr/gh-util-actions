@@ -96,7 +96,7 @@ runs:
 
   - name: Create a branch if a PR is required
     id: create-branch
-    if: ${{ inputs.requiresPr == 'true' }}
+    if: ${{ inputs.requiresPr == true }}
     shell: bash
     env:
       PATCHLEVEL: ${{ inputs.patchlevel }}
