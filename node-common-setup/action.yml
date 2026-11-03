@@ -11,7 +11,7 @@ inputs:
     type: string
     description: 'The node version to install before running the action'
     required: false
-    default: '20.15.1'
+    default: '22'
   scope:
     type: string
     description: 'The scope to use for the .npmrc file if it needs overriding'
