@@ -22,7 +22,7 @@ jobs:
       with:
         dependency: 'rimraf'
         projectPath: './npm-dependency-pr/tests'
-        nodeVersion: '20.15.1'
+        nodeVersion: '22'
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
         labels: |
@@ -57,7 +57,7 @@ jobs:
         dependency: 'rimraf'
         packageVersion: '5.0.9'
         projectPath: './npm-dependency-pr/tests'
-        nodeVersion: '20.15.1'
+        nodeVersion: '22'
         failOnNoNewVersion: true
         token: ${{ secrets.GITHUB_TOKEN }}
         labels: |
@@ -101,3 +101,30 @@ jobs:
 
 #   - name: Check out repository code
 #     uses: actions/checkout@v4
+
+  node-lts:
+    name: npm compatibility (Node ${{ matrix.node-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24, 26]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+        working-directory: npm-dependency-pr/tests
+      - uses: tjsr/action-npm-outdated@main
+        id: outdated
+        with:
+          dependency: rimraf
+          projectPath: npm-dependency-pr/tests
+          skipNpmCiExecute: false
+      - name: Verify outdated detection
+        env:
+          LATEST: ${{ steps.outdated.outputs.latest }}
+        run: test -n "$LATEST"
